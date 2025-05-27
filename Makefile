@@ -1,0 +1,25 @@
+SRC_DIR := src
+OUT_DIR := out
+
+SOURCE := $(shell find $(SRC_DIR) -name "*.java") 
+
+# Compile and run
+all:
+	@echo "Compiling program..."
+	@mkdir -p $(OUT_DIR)
+	@javac -d $(OUT_DIR) $(SOURCE)
+	@echo "Starting program..."
+	@java -cp $(OUT_DIR) Main
+
+compile:
+	@echo "Compiling program..."
+	@mkdir -p $(OUT_DIR)
+	@javac -d $(OUT_DIR) $(SOURCE)
+
+run:
+	@echo "Starting program..."
+	@java -cp $(OUT_DIR) Main
+
+clean:
+	@echo "Cleaning folder..."
+	@rm -rf $(OUT_DIR)

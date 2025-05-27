@@ -1,0 +1,5 @@
+package move;
+
+class Move {
+
+}
