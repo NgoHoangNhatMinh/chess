@@ -1,10 +1,15 @@
-import board.Board;
+import bitboard.Bitboard;
+import static utils.BitUtils.*;
 
 class Main {
     public static void main(String... args) {
-        Board board = new Board();
-        board.init();
-        System.out.println(board);
+        Bitboard bitboard = new Bitboard();
+        bitboard.init();
+        // System.out.println(bitboard);
+        // print(Bitboard.H);
+        for (int i = 0; i < 64; i++) {
+            print(Bitboard.generateKingAttack(i));
+        }
         return;
     }
 }
