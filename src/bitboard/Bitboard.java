@@ -1,15 +1,20 @@
 package bitboard;
 
+enum PE {
+    WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
+}
+
 public class Bitboard {
-    char[] GRAPHIC = {'♙', '♘', '♗', '♖', '♕', '♔', '♟', '♞', '♝', '♜', '♛', '♚', '.'}; 
-    long[] pieces = new long[13];
-    long whiteOccupany, blackOccupancy, occupany, unoccupancy;
-    long[] knightAttacks = new long[64];
-    long[] kingAttacks = new long[64];
     public static final long H = 0x8080808080808080L; 
     public static final long A = 0x0101010101010101L;
     public static final long GH = 0xC0C0C0C0C0C0C0C0L;
     public static final long AB = 0x0303030303030303L;
+    char[] GRAPHIC = {'♙', '♘', '♗', '♖', '♕', '♔', '♟', '♞', '♝', '♜', '♛', '♚', '.'}; 
+
+    long[] pieces = new long[13];
+    long whiteOccupany, blackOccupancy, occupany, unoccupancy;
+    long[] knightAttacks = new long[64];
+    long[] kingAttacks = new long[64];
 
     public void init() {
         pieces[0] = 0x00FF000000000000L;
@@ -77,6 +82,20 @@ public class Bitboard {
         kingAttack |= (init >>> 8) | (init << 8);
 
         return kingAttack;
+    }
+
+    public void removePiece(char piece, int from, boolean isWhite) {
+        long fromBit = 1L << from;
+        if (isWhite) {
+            switch (piece) {
+                case 'K':
+                    pieces[5] &= ~fromBit; 
+                    break;
+            
+                default:
+                    break;
+            }
+        } 
     }
     
     @Override
