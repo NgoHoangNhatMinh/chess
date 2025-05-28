@@ -36,7 +36,7 @@ public class Bitboard {
         initAttacks();
     }
 
-    private void updateOccupancy() {
+    public void updateOccupancy() {
         whiteOccupany = pieces[0] | pieces[1] | pieces[2] | pieces[3] | pieces[4] | pieces[5];
         blackOccupancy = pieces[6] | pieces[7] | pieces[8] | pieces[9] | pieces[10] | pieces[11];
         occupany = whiteOccupany | blackOccupancy;
@@ -85,18 +85,21 @@ public class Bitboard {
         return kingAttack;
     }
 
-    public void removePiece(char piece, int from, boolean isWhite) {
-        long fromBit = 1L << from;
-        if (isWhite) {
-            switch (piece) {
-                case 'K':
-                    pieces[5] &= ~fromBit;
-                    break;
+    public void removePiece(int piece, int from) {
+        pieces[piece] &= ~(1L << from);
+    }
 
-                default:
-                    break;
+    public void addPiece(int piece, int to) {
+        pieces[piece] |= (1L << to);
+    }
+
+    public int getPieceAt(int to) {
+        for (int i = 0; i < pieces.length; i++) {
+            if ((pieces[i] & (1L << to)) != 0) {
+                return i;
             }
         }
+        return -1;
     }
 
     @Override

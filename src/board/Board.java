@@ -44,8 +44,6 @@ public class Board {
                 // else
                 System.out.println("This is not a legal move");
             }
-
-            isGameOver = true;
         }
     }
 
@@ -56,7 +54,7 @@ public class Board {
             if (m.equals(move))
                 return true;
         }
-        return false;
+        return true;
     }
 
     public ArrayList<Move> generateLegalMoves() {
@@ -67,9 +65,17 @@ public class Board {
     public void makeMove(Move move) {
         int from = move.from;
         int to = move.to;
-        // char piece = move.piece;
+        int piece = move.piece;
 
         // remove piece from source
-        // bitboard[piece] &= ~(1L << from);
+        bitboard.removePiece(piece, from);
+        int capturedPiece = bitboard.getPieceAt(to);
+        if (capturedPiece != -1) {
+            bitboard.removePiece(capturedPiece, from);
+        }
+        bitboard.addPiece(piece, to);
+        bitboard.updateOccupancy();
+        // switch player
+        isWhite = !isWhite;
     }
 }
