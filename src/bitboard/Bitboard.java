@@ -5,11 +5,12 @@ enum PE {
 }
 
 public class Bitboard {
-    public static final long H = 0x8080808080808080L; 
+    public static final long H = 0x8080808080808080L;
     public static final long A = 0x0101010101010101L;
     public static final long GH = 0xC0C0C0C0C0C0C0C0L;
     public static final long AB = 0x0303030303030303L;
-    char[] GRAPHIC = {'♙', '♘', '♗', '♖', '♕', '♔', '♟', '♞', '♝', '♜', '♛', '♚', '.'}; 
+    public static final char[] GRAPHIC = { '♙', '♘', '♗', '♖', '♕', '♔', '♟', '♞', '♝', '♜', '♛', '♚', '.' };
+    public static final String[] PIECES_STRINGS = { "WP", "WN", "WB", "WR", "WQ", "WK", "BP", "BN", "BB", "BQ", "BK" };
 
     long[] pieces = new long[13];
     long whiteOccupany, blackOccupancy, occupany, unoccupancy;
@@ -28,7 +29,7 @@ public class Bitboard {
         pieces[7] = 0x0000000000000042L;
         pieces[8] = 0x0000000000000024L;
         pieces[9] = 0x0000000000000081L;
-        pieces[10] = 0x0000000000000008L;    
+        pieces[10] = 0x0000000000000008L;
         pieces[11] = 0x0000000000000010L;
         updateOccupancy();
 
@@ -89,15 +90,15 @@ public class Bitboard {
         if (isWhite) {
             switch (piece) {
                 case 'K':
-                    pieces[5] &= ~fromBit; 
+                    pieces[5] &= ~fromBit;
                     break;
-            
+
                 default:
                     break;
             }
-        } 
+        }
     }
-    
+
     @Override
     public String toString() {
         String board = "";
