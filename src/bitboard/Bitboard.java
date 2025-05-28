@@ -1,5 +1,8 @@
 package bitboard;
 
+import java.util.ArrayList;
+import utils.Move;
+
 enum PE {
     WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
 }
@@ -16,6 +19,7 @@ public class Bitboard {
     long whiteOccupany, blackOccupancy, occupany, unoccupancy;
     long[] knightAttacks = new long[64];
     long[] kingAttacks = new long[64];
+    boolean isWhite = true;
 
     public void init() {
         pieces[0] = 0x00FF000000000000L;
@@ -100,6 +104,56 @@ public class Bitboard {
             }
         }
         return -1;
+    }
+
+    public ArrayList<Move> generateKnightMoves(boolean isWhite) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+        int currPiece = isWhite ? 1 : 7;
+        long knights = pieces[currPiece];
+        long ownOccupancy = isWhite ? whiteOccupany : blackOccupancy;
+
+        while (knights != 0) {
+            int from = Long.numberOfTrailingZeros(knights);
+            long possible = knightAttacks[from] & ~ownOccupancy;
+
+            while (possible != 0) {
+                int to = Long.numberOfTrailingZeros(possible);
+                possibleMoves.add(new Move(from, to, currPiece));
+
+                possible &= possible - 1;
+            }
+
+            knights &= knights - 1;
+        }
+
+        return possibleMoves;
+    }
+
+    public ArrayList<Move> generateKingMoves(boolean isWhite) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+        int currPiece = isWhite ? 5 : 11;
+        long kings = pieces[currPiece];
+        long ownOccupancy = isWhite ? whiteOccupany : blackOccupancy;
+
+        while (kings != 0) {
+            int from = Long.numberOfTrailingZeros(kings);
+            long possible = kingAttacks[from] & ~ownOccupancy;
+
+            while (possible != 0) {
+                int to = Long.numberOfTrailingZeros(possible);
+                possibleMoves.add(new Move(from, to, currPiece));
+
+                possible &= possible - 1;
+            }
+
+            kings &= kings - 1;
+        }
+
+        return possibleMoves;
+    }
+
+    public void switchPlayer() {
+        isWhite = !isWhite;
     }
 
     @Override

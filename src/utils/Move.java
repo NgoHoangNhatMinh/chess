@@ -78,7 +78,7 @@ public class Move {
 
     }
 
-    public Move(int from, int to, char piece) {
+    public Move(int from, int to, int piece) {
         this.from = from;
         this.to = to;
         this.piece = piece;
@@ -103,6 +103,11 @@ public class Move {
 
     @Override
     public boolean equals(Object o) {
-        return true;
+        if (this == o)
+            return true;
+        if (o instanceof Move m) {
+            return (this.piece == m.piece) && (this.from == m.from) && (this.to == m.to);
+        }
+        return false;
     }
 }

@@ -25,11 +25,11 @@ public class Board {
     }
 
     public void run() {
+        Scanner scanner = new Scanner(System.in);
         while (!isGameOver) {
             System.out.println(bitboard);
 
             // Inputting move
-            Scanner scanner = new Scanner(System.in);
             System.out.println((isWhite ? "White" : "Black") + " to move: ");
 
             String moveString = scanner.nextLine();
@@ -42,23 +42,40 @@ public class Board {
                 makeMove(move);
             } else {
                 // else
-                System.out.println("This is not a legal move");
+                System.out.println("This is not a legal move\n");
             }
         }
+        scanner.close();
     }
 
     public boolean isLegalMove(Move move) {
-        ArrayList<Move> legalMoves = generateLegalMoves();
+        // We generate all the potential moves first and then check if our king is
+        // checked
+        ArrayList<Move> potentialMoves = generateLegalMoves();
+
+        // System.out.println("These are the legal moves: ");
+        // for (Move m : potentialMoves) {
+        // System.out.println(m);
+        // }
+
+        // filter moves that lead to check
+        ArrayList<Move> legalMoves = potentialMoves;
 
         for (Move m : legalMoves) {
             if (m.equals(move))
                 return true;
         }
-        return true;
+        return false;
     }
 
     public ArrayList<Move> generateLegalMoves() {
         ArrayList<Move> moves = new ArrayList<Move>();
+
+        // Generate all knight's moves
+        moves.addAll(bitboard.generateKnightMoves(isWhite));
+        // Generate akk king;s moves
+        moves.addAll(bitboard.generateKingMoves(isWhite));
+
         return moves;
     }
 
@@ -76,6 +93,10 @@ public class Board {
         bitboard.addPiece(piece, to);
         bitboard.updateOccupancy();
         // switch player
+        switchPlayer();
+    }
+
+    public void switchPlayer() {
         isWhite = !isWhite;
     }
 }
