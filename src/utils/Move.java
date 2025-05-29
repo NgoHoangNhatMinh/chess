@@ -9,6 +9,8 @@ public class Move {
     public int to;
     public int piece;
     public boolean isWhite;
+    public boolean isShortCastling;
+    public boolean isLongCastling;
 
     public Move(String move, boolean isWhite) {
         piecesMap.put("WP", 0);
@@ -24,11 +26,18 @@ public class Move {
         piecesMap.put("BQ", 10);
         piecesMap.put("BK", 11);
 
-        if (move.length() == 4) {
+        isShortCastling = false;
+        isLongCastling = false;
+
+        if (move.equals("0-0")) {
+            isLongCastling = true;
+        } else if (move.equals("0-0-0")) {
+            isLongCastling = true;
+        } else if (move.length() == 4) {
             piece = isWhite ? piecesMap.get("WP") : piecesMap.get("BP");
             from = toNum(move.substring(0, 2));
             to = toNum(move.substring(2, 4));
-        } else {
+        } else if (move.length() == 5) {
             if (isWhite) {
                 switch (move.toUpperCase().charAt(0)) {
                     case 'N':

@@ -4,6 +4,7 @@ import utils.Move;
 import bitboard.Bitboard;
 import java.util.Scanner;
 import java.util.ArrayList;
+import static utils.OtherUtils.*;
 
 public class Board {
     private Bitboard bitboard;
@@ -25,6 +26,7 @@ public class Board {
     }
 
     public void run() {
+        clearScreen();
         Scanner scanner = new Scanner(System.in);
         while (!isGameOver) {
             System.out.println(bitboard);
@@ -35,31 +37,37 @@ public class Board {
             String moveString = scanner.nextLine();
             Move move = new Move(moveString, isWhite);
 
+            clearScreen();
             System.out.println(move);
 
             // If legal move, board make move
             if (isLegalMove(move)) {
                 makeMove(move);
             } else {
-                // else
                 System.out.println("This is not a legal move\n");
+                System.out.println("These are the legal moves\n");
+                for (Move m : generateLegalMoves()) {
+                    System.out.println(m);
+                }
             }
         }
         scanner.close();
     }
 
+    public Board copy() {
+        Board newBoard = new Board();
+        newBoard.bitboard = bitboard.copy();
+        newBoard.isWhite = isWhite;
+        newBoard.whiteCastle = whiteCastle;
+        newBoard.blackCastle = blackCastle;
+        newBoard.isGameOver = isGameOver;
+        newBoard.whiteEnPassant = whiteEnPassant.clone();
+        newBoard.blackEnPassant = this.blackEnPassant.clone();
+        return newBoard;
+    }
+
     public boolean isLegalMove(Move move) {
-        // We generate all the potential moves first and then check if our king is
-        // checked
-        ArrayList<Move> potentialMoves = generateLegalMoves();
-
-        System.out.println("These are the legal moves: ");
-        for (Move m : potentialMoves) {
-            System.out.println(m);
-        }
-
-        // filter moves that lead to check
-        ArrayList<Move> legalMoves = potentialMoves;
+        ArrayList<Move> legalMoves = generateLegalMoves();
 
         for (Move m : legalMoves) {
             if (m.equals(move))
@@ -69,16 +77,28 @@ public class Board {
     }
 
     public ArrayList<Move> generateLegalMoves() {
-        ArrayList<Move> moves = new ArrayList<Move>();
+        // pseudoMoves have not accounted for king being checked after the moves are
+        // made
+        ArrayList<Move> pseudoMoves = new ArrayList<Move>();
 
-        moves.addAll(bitboard.generatePawnMoves(isWhite));
-        moves.addAll(bitboard.generateKnightMoves(isWhite));
-        moves.addAll(bitboard.generateBishopMoves(isWhite));
-        moves.addAll(bitboard.generateRookMoves(isWhite));
-        moves.addAll(bitboard.generateQueenMoves(isWhite));
-        moves.addAll(bitboard.generateKingMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generatePawnMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generateKnightMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generateBishopMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generateRookMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generateQueenMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generateKingMoves(isWhite));
+        pseudoMoves.addAll(bitboard.generateCastlingMoves(isWhite));
 
-        return moves;
+        ArrayList<Move> legalMoves = new ArrayList<Move>();
+
+        for (Move move : pseudoMoves) {
+            Board boardCopy = this.copy();
+            boardCopy.makeMove(move);
+            if (!boardCopy.bitboard.isKingInCheck(isWhite))
+                legalMoves.add(move);
+        }
+
+        return legalMoves;
     }
 
     public void makeMove(Move move) {

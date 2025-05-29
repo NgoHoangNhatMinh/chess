@@ -20,13 +20,19 @@ public class Bitboard {
     public static final long RANK_4 = 0x000000FF00000000L;
     public static final long RANK_5 = 0x00000000FF000000L;
 
+    static long[] knightAttacks = new long[64];
+    static long[] kingAttacks = new long[64];
+    static long[] whitePawnAttacks = new long[64];
+    static long[] blackPawnAttacks = new long[64];
+
     long[] pieces = new long[13];
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
-    long[] knightAttacks = new long[64];
-    long[] kingAttacks = new long[64];
-    long[] whitePawnAttacks = new long[64];
-    long[] blackPawnAttacks = new long[64];
     boolean isWhite = true;
+
+    static {
+        initAttacks();
+        MagicBitboards.init();
+    }
 
     public void init() {
         pieces[0] = 0x00FF000000000000L;
@@ -43,9 +49,6 @@ public class Bitboard {
         pieces[10] = 0x0000000000000008L;
         pieces[11] = 0x0000000000000010L;
         updateOccupancy();
-
-        initAttacks();
-        MagicBitboards.init();
     }
 
     public void updateOccupancy() {
@@ -57,13 +60,22 @@ public class Bitboard {
     }
 
     // Generate the loopup attacks table for knight and king
-    private void initAttacks() {
+    private static void initAttacks() {
         for (int i = 0; i < 64; i++) {
             knightAttacks[i] = generateKnightAttack(i);
             kingAttacks[i] = generateKingAttack(i);
             whitePawnAttacks[i] = generateWhitePawnAttack(i);
             blackPawnAttacks[i] = generateBlackPawnAttack(i);
         }
+    }
+
+    public Bitboard copy() {
+        Bitboard newBB = new Bitboard();
+        for (int i = 0; i < pieces.length; i++) {
+            newBB.pieces[i] = pieces[i];
+        }
+        newBB.isWhite = isWhite;
+        return newBB;
     }
 
     // Generate the possible knight attacks on 1 of the 64 squares
@@ -333,7 +345,6 @@ public class Bitboard {
 
             long attacks = MagicBitboards.computeRookAttacks(from, blockers)
                     | MagicBitboards.computeBishopAttacks(from, blockers);
-            print(attacks);
             long possible = attacks & ~ownOccupancy;
 
             while (possible != 0) {
@@ -347,8 +358,53 @@ public class Bitboard {
         return possibleMoves;
     }
 
+    public ArrayList<Move> generateCastlingMoves(boolean isWhite) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+
+        return possibleMoves;
+    }
+
     public void switchPlayer() {
         isWhite = !isWhite;
+    }
+
+    public boolean isKingInCheck(boolean isWhite) {
+        int piece = isWhite ? 5 : 11;
+        long king = pieces[piece];
+        int from = Long.numberOfTrailingZeros(king);
+
+        // Check all opponent pieces if they can attack king square
+        long opponentPawns = isWhite ? pieces[6] : pieces[0];
+        long opponentKnights = isWhite ? pieces[7] : pieces[1];
+        long opponentBishops = isWhite ? pieces[8] : pieces[2];
+        long opponentRooks = isWhite ? pieces[9] : pieces[3];
+        long opponentQueens = isWhite ? pieces[10] : pieces[4];
+        long opponentKing = isWhite ? pieces[11] : pieces[5];
+
+        // putting the piece at the king square and attack out to opponent pieces
+        long pawnAttacks = isWhite ? whitePawnAttacks[from] : blackPawnAttacks[from];
+        if ((pawnAttacks & opponentPawns) != 0)
+            return true;
+
+        if ((knightAttacks[from] & opponentKnights) != 0)
+            return true;
+
+        // Check for bishop and queen's diagional
+        long bishopBlockers = occupancy & MagicBitboards.bishopRelevantOccupancy[from];
+        long bishopAttacks = MagicBitboards.computeBishopAttacks(from, bishopBlockers);
+        if ((bishopAttacks & (opponentBishops | opponentQueens)) != 0)
+            return true;
+
+        // Check for rook and queen's vertical/horizontal movements
+        long rookBlockers = occupancy & MagicBitboards.rookRelevantOccupancy[from];
+        long rookAttacks = MagicBitboards.computeRookAttacks(from, rookBlockers);
+        if ((rookAttacks & (opponentRooks | opponentQueens)) != 0)
+            return true;
+
+        if ((kingAttacks[from] & opponentKing) != 0)
+            return true;
+
+        return false;
     }
 
     @Override
