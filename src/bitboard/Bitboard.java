@@ -2,7 +2,6 @@ package bitboard;
 
 import java.util.ArrayList;
 import utils.Move;
-import static utils.BitUtils.*;
 
 enum PE {
     WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
@@ -246,6 +245,62 @@ public class Bitboard {
     public long bDblPushTargets() {
         long singlePushs = bSinglePushTargets();
         return (singlePushs << 8) & emptyOccupancy & RANK_5;
+    }
+
+    public ArrayList<Move> generateRookMoves(boolean isWhite) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+        int currPiece = isWhite ? 4 : 10;
+        long rooks = pieces[currPiece];
+        long ownOccupancy = isWhite ? whiteOccupancy : blackOccupancy;
+
+        while (rooks != 0) {
+            int from = Long.numberOfTrailingZeros(rooks);
+
+            long mask = MagicBitboards.rookRelevantOccupancy[from];
+            long blockers = occupancy & mask;
+            // Compute index for precomputed attack table:
+            // https://www.chessprogramming.org/Magic_Bitboards
+            int index = (int) ((blockers * MagicBitboards.rookMagic[from]) >>> (64 - Long.bitCount(blockers)));
+            long attacks = MagicBitboards.rookAttacks[from][index];
+            long possible = attacks & ~ownOccupancy;
+
+            while (possible != 0) {
+                int to = Long.numberOfTrailingZeros(possible);
+                possibleMoves.add(new Move(from, to, currPiece));
+                possible &= possible - 1;
+            }
+            rooks &= rooks - 1;
+        }
+
+        return possibleMoves;
+    }
+
+    public ArrayList<Move> generateBishopMoves(boolean isWhite) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+        int currPiece = isWhite ? 3 : 9;
+        long bishops = pieces[currPiece];
+        long ownOccupancy = isWhite ? whiteOccupancy : blackOccupancy;
+
+        while (bishops != 0) {
+            int from = Long.numberOfTrailingZeros(bishops);
+
+            long mask = MagicBitboards.bishopRelevantOccupancy[from];
+            long blockers = occupancy & mask;
+            // Compute index for precomputed attack table:
+            // https://www.chessprogramming.org/Magic_Bitboards
+            int index = (int) ((blockers * MagicBitboards.bishopMagic[from]) >>> (64 - Long.bitCount(blockers)));
+            long attacks = MagicBitboards.bishopAttacks[from][index];
+            long possible = attacks & ~ownOccupancy;
+
+            while (possible != 0) {
+                int to = Long.numberOfTrailingZeros(possible);
+                possibleMoves.add(new Move(from, to, currPiece));
+                possible &= possible - 1;
+            }
+            bishops &= bishops - 1;
+        }
+
+        return possibleMoves;
     }
 
     public void switchPlayer() {

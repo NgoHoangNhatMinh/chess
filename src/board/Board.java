@@ -71,12 +71,14 @@ public class Board {
     public ArrayList<Move> generateLegalMoves() {
         ArrayList<Move> moves = new ArrayList<Move>();
 
-        // Generate all knight's moves
+        // Generate all knights' moves
         moves.addAll(bitboard.generateKnightMoves(isWhite));
         // Generate all king's moves
         moves.addAll(bitboard.generateKingMoves(isWhite));
         // Generate all pawns' moves
         moves.addAll(bitboard.generatePawnMoves(isWhite));
+        // Generate all rooks' moves
+        moves.addAll(bitboard.generateRookMoves(isWhite));
 
         return moves;
     }
