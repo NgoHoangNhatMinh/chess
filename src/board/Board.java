@@ -53,10 +53,10 @@ public class Board {
         // checked
         ArrayList<Move> potentialMoves = generateLegalMoves();
 
-        // System.out.println("These are the legal moves: ");
-        // for (Move m : potentialMoves) {
-        // System.out.println(m);
-        // }
+        System.out.println("These are the legal moves: ");
+        for (Move m : potentialMoves) {
+            System.out.println(m);
+        }
 
         // filter moves that lead to check
         ArrayList<Move> legalMoves = potentialMoves;
@@ -73,8 +73,10 @@ public class Board {
 
         // Generate all knight's moves
         moves.addAll(bitboard.generateKnightMoves(isWhite));
-        // Generate akk king;s moves
+        // Generate all king's moves
         moves.addAll(bitboard.generateKingMoves(isWhite));
+        // Generate all pawns' moves
+        moves.addAll(bitboard.generatePawnMoves(isWhite));
 
         return moves;
     }
