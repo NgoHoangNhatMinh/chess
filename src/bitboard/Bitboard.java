@@ -1,5 +1,7 @@
 package bitboard;
 
+import static utils.BitUtils.print;
+
 import java.util.ArrayList;
 import utils.Move;
 
@@ -13,7 +15,8 @@ public class Bitboard {
     public static final long GH = 0xC0C0C0C0C0C0C0C0L;
     public static final long AB = 0x0303030303030303L;
     public static final char[] GRAPHIC = { '♙', '♘', '♗', '♖', '♕', '♔', '♟', '♞', '♝', '♜', '♛', '♚', '.' };
-    public static final String[] PIECES_STRINGS = { "WP", "WN", "WB", "WR", "WQ", "WK", "BP", "BN", "BB", "BQ", "BK" };
+    public static final String[] PIECES_STRINGS = { "WP", "WN", "WB", "WR", "WQ", "WK", "BP", "BN", "BB", "BR", "BQ",
+            "BK" };
     public static final long RANK_4 = 0x000000FF00000000L;
     public static final long RANK_5 = 0x00000000FF000000L;
 
@@ -42,6 +45,7 @@ public class Bitboard {
         updateOccupancy();
 
         initAttacks();
+        MagicBitboards.init();
     }
 
     public void updateOccupancy() {
@@ -249,7 +253,7 @@ public class Bitboard {
 
     public ArrayList<Move> generateRookMoves(boolean isWhite) {
         ArrayList<Move> possibleMoves = new ArrayList<>();
-        int currPiece = isWhite ? 4 : 10;
+        int currPiece = isWhite ? 3 : 9;
         long rooks = pieces[currPiece];
         long ownOccupancy = isWhite ? whiteOccupancy : blackOccupancy;
 
@@ -260,8 +264,12 @@ public class Bitboard {
             long blockers = occupancy & mask;
             // Compute index for precomputed attack table:
             // https://www.chessprogramming.org/Magic_Bitboards
-            int index = (int) ((blockers * MagicBitboards.rookMagic[from]) >>> (64 - Long.bitCount(blockers)));
-            long attacks = MagicBitboards.rookAttacks[from][index];
+            // int index = (int) ((blockers * MagicBitboards.rookMagic[from]) >>> (64
+            // - Long.bitCount(MagicBitboards.rookRelevantOccupancy[from])));
+            // long attacks = MagicBitboards.rookAttacks[from][index];
+
+            // compute attacks manually by scanning the board
+            long attacks = MagicBitboards.computeRookAttacks(from, blockers);
             long possible = attacks & ~ownOccupancy;
 
             while (possible != 0) {
@@ -277,7 +285,7 @@ public class Bitboard {
 
     public ArrayList<Move> generateBishopMoves(boolean isWhite) {
         ArrayList<Move> possibleMoves = new ArrayList<>();
-        int currPiece = isWhite ? 3 : 9;
+        int currPiece = isWhite ? 2 : 8;
         long bishops = pieces[currPiece];
         long ownOccupancy = isWhite ? whiteOccupancy : blackOccupancy;
 
@@ -288,8 +296,11 @@ public class Bitboard {
             long blockers = occupancy & mask;
             // Compute index for precomputed attack table:
             // https://www.chessprogramming.org/Magic_Bitboards
-            int index = (int) ((blockers * MagicBitboards.bishopMagic[from]) >>> (64 - Long.bitCount(blockers)));
-            long attacks = MagicBitboards.bishopAttacks[from][index];
+            // int index = (int) ((blockers * MagicBitboards.bishopMagic[from]) >>> (64
+            // - Long.bitCount(MagicBitboards.bishopRelevantOccupancy[from])));
+            // long attacks = MagicBitboards.bishopAttacks[from][index];
+
+            long attacks = MagicBitboards.computeBishopAttacks(from, blockers);
             long possible = attacks & ~ownOccupancy;
 
             while (possible != 0) {
@@ -298,6 +309,39 @@ public class Bitboard {
                 possible &= possible - 1;
             }
             bishops &= bishops - 1;
+        }
+
+        return possibleMoves;
+    }
+
+    public ArrayList<Move> generateQueenMoves(boolean isWhite) {
+        ArrayList<Move> possibleMoves = new ArrayList<>();
+        int currPiece = isWhite ? 4 : 10;
+        long queens = pieces[currPiece];
+        long ownOccupancy = isWhite ? whiteOccupancy : blackOccupancy;
+
+        while (queens != 0) {
+            int from = Long.numberOfTrailingZeros(queens);
+
+            long mask = MagicBitboards.rookRelevantOccupancy[from] | MagicBitboards.bishopRelevantOccupancy[from];
+            long blockers = occupancy & mask;
+            // Compute index for precomputed attack table:
+            // https://www.chessprogramming.org/Magic_Bitboards
+            // int index = (int) ((blockers * MagicBitboards.queenMagic[from]) >>> (64
+            // - Long.bitCount(MagicBitboards.queenRelevantOccupancy[from])));
+            // long attacks = MagicBitboards.queenAttacks[from][index];
+
+            long attacks = MagicBitboards.computeRookAttacks(from, blockers)
+                    | MagicBitboards.computeBishopAttacks(from, blockers);
+            print(attacks);
+            long possible = attacks & ~ownOccupancy;
+
+            while (possible != 0) {
+                int to = Long.numberOfTrailingZeros(possible);
+                possibleMoves.add(new Move(from, to, currPiece));
+                possible &= possible - 1;
+            }
+            queens &= queens - 1;
         }
 
         return possibleMoves;
