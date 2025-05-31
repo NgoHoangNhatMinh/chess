@@ -24,6 +24,19 @@ public class Board {
         while (!bitboard.isGameOver()) {
             System.out.println(bitboard);
 
+            ArrayList<Move> legalMoves = generateLegalMoves();
+            for (Move m : legalMoves) {
+                System.out.println(m);
+            }
+
+            if (legalMoves.isEmpty()) {
+                if (bitboard.isKingInCheck(isWhite))
+                    System.out.println((isWhite ? "White" : "Black") + " is checkmated");
+                else
+                    System.out.println("The game is a draw");
+                break;
+            }
+
             // Inputting move
             System.out.println((isWhite ? "White" : "Black") + " to move: ");
 
@@ -32,12 +45,6 @@ public class Board {
 
             // clearScreen();
             System.out.println(move);
-
-            System.out.println("These are the legal moves\n");
-            ArrayList<Move> legalMoves = generateLegalMoves();
-            for (Move m : legalMoves) {
-                System.out.println(m);
-            }
 
             Move selectedMove = null;
             for (Move m : legalMoves) {
