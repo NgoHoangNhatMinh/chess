@@ -1,7 +1,5 @@
 package bitboard;
 
-import static utils.BitUtils.print;
-
 import java.util.ArrayList;
 
 import move.Move;
@@ -266,15 +264,24 @@ public class Bitboard {
 
     public ArrayList<Move> generatePawnMoves(boolean isWhite) {
         ArrayList<Move> possibleMoves = new ArrayList<>();
+        int currPiece = isWhite ? 0 : 6;
         long singlePushs = isWhite ? wSinglePushTargets() : bSinglePushTargets();
         long doublePushs = isWhite ? wDblPushTargets() : bDblPushTargets();
 
         while (singlePushs != 0) {
             int to = Long.numberOfTrailingZeros(singlePushs);
             if (isWhite) {
-                possibleMoves.add(new Move(to + 8, to, 0));
+                if (to / 8 == 0)
+                    for (int i = 1; i < 5; i++)
+                        possibleMoves.add(new Move(to + 8, to, currPiece, i));
+                else
+                    possibleMoves.add(new Move(to + 8, to, currPiece));
             } else {
-                possibleMoves.add(new Move(to - 8, to, 6));
+                if (to / 8 == 7)
+                    for (int i = 7; i < 11; i++)
+                        possibleMoves.add(new Move(to - 8, to, currPiece, i));
+                else
+                    possibleMoves.add(new Move(to - 8, to, currPiece));
             }
             singlePushs &= singlePushs - 1;
         }
@@ -289,7 +296,6 @@ public class Bitboard {
             doublePushs &= doublePushs - 1;
         }
 
-        int currPiece = isWhite ? 0 : 6;
         long pawns = pieces[currPiece];
         long opponentOccupancy = isWhite ? blackOccupancy : whiteOccupancy;
 
@@ -310,7 +316,20 @@ public class Bitboard {
 
             while (possible != 0) {
                 int to = Long.numberOfTrailingZeros(possible);
-                possibleMoves.add(new Move(from, to, currPiece));
+                if (isWhite) {
+                    if (to / 8 == 0)
+                        for (int i = 1; i < 5; i++)
+                            possibleMoves.add(new Move(from, to, currPiece, i));
+                    else
+                        possibleMoves.add(new Move(from, to, currPiece));
+                } else {
+                    if (to / 8 == 7)
+                        for (int i = 7; i < 11; i++)
+                            possibleMoves.add(new Move(from, to, currPiece, i));
+                    else
+                        possibleMoves.add(new Move(from, to, currPiece));
+                }
+                // possibleMoves.add(new Move(from, to, currPiece));
                 possible &= possible - 1;
             }
             pawns &= pawns - 1;

@@ -8,6 +8,7 @@ public class Move {
     public int from;
     public int to;
     public int piece;
+    public int promotionPiece = -1;
     public boolean isWhite;
     public boolean isShortCastling;
     public boolean isLongCastling;
@@ -34,10 +35,51 @@ public class Move {
             isShortCastling = true;
         } else if (move.equals("0-0-0")) {
             isLongCastling = true;
-        } else if (move.length() == 4) {
+        } else if (move.length() == 4 || move.length() == 6) {
             piece = isWhite ? piecesMap.get("WP") : piecesMap.get("BP");
             from = toNum(move.substring(0, 2));
             to = toNum(move.substring(2, 4));
+            if (isWhite && move.length() == 6) {
+                switch (move.toUpperCase().charAt(5)) {
+                    case 'N':
+                        promotionPiece = piecesMap.get("WN");
+                        break;
+                    case 'B':
+                        promotionPiece = piecesMap.get("WB");
+                        break;
+                    case 'R':
+                        promotionPiece = piecesMap.get("WR");
+                        break;
+                    case 'Q':
+                        promotionPiece = piecesMap.get("WQ");
+                        break;
+                    case 'K':
+                        promotionPiece = piecesMap.get("WK");
+                        break;
+                    default:
+                        break;
+                }
+            } else if (!isWhite && move.length() == 6) {
+                switch (move.toUpperCase().charAt(5)) {
+                    case 'N':
+                        promotionPiece = piecesMap.get("BN");
+                        break;
+                    case 'B':
+                        promotionPiece = piecesMap.get("BB");
+                        break;
+                    case 'R':
+                        promotionPiece = piecesMap.get("BR");
+                        break;
+                    case 'Q':
+                        promotionPiece = piecesMap.get("BQ");
+                        break;
+                    case 'K':
+                        promotionPiece = piecesMap.get("BK");
+                        break;
+                    default:
+                        break;
+                }
+            }
         } else if (move.length() == 5) {
             if (isWhite) {
                 switch (move.toUpperCase().charAt(0)) {
@@ -101,6 +143,13 @@ public class Move {
         this.isEnPassant = isEnPassant;
     }
 
+    public Move(int from, int to, int piece, int promotionPiece) {
+        this.from = from;
+        this.to = to;
+        this.piece = piece;
+        this.promotionPiece = promotionPiece;
+    }
+
     public static int toNum(String s) {
         char l = s.toLowerCase().charAt(0);
         char n = s.charAt(1);
@@ -129,7 +178,8 @@ public class Move {
         if (o instanceof Move m) {
             if (isLongCastling || isShortCastling)
                 return this.isLongCastling == m.isLongCastling || this.isShortCastling == m.isShortCastling;
-            return ((this.piece == m.piece) && (this.from == m.from) && (this.to == m.to));
+            return ((this.piece == m.piece) && (this.from == m.from) && (this.to == m.to))
+                    && (this.promotionPiece == m.promotionPiece);
         }
         return false;
     }

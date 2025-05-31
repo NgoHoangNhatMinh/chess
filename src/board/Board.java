@@ -117,7 +117,10 @@ public class Board {
                 int removedFrom = isWhite ? to + 8 : to - 8;
                 bitboard.removePiece(isWhite ? 6 : 0, removedFrom);
             }
-            bitboard.addPiece(piece, to);
+            if (move.promotionPiece != -1)
+                bitboard.addPiece(move.promotionPiece, to);
+            else
+                bitboard.addPiece(piece, to);
 
             // Handle castling's rights
             if (piece == 3) {
