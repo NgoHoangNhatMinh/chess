@@ -19,6 +19,11 @@ public class Board {
         isWhite = true;
     }
 
+    public void init(String fen) {
+        bitboard = new Bitboard();
+        bitboard.init(fen);
+    }
+
     public void run() {
         clearScreen();
         Scanner scanner = new Scanner(System.in);
@@ -27,6 +32,7 @@ public class Board {
 
             ArrayList<Move> legalMoves = generateLegalMoves();
             for (Move m : legalMoves) {
+                // For debugging
                 System.out.println(m);
             }
 

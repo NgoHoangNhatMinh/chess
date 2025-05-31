@@ -26,7 +26,6 @@ public class Bitboard {
 
     long[] pieces = new long[13];
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
-    boolean isWhite = true;
 
     public boolean canShortCastleWhite;
     public boolean canLongCastleWhite;
@@ -65,6 +64,10 @@ public class Bitboard {
         updateOccupancy();
     }
 
+    public void init(String fen) {
+
+    }
+
     public void updateOccupancy() {
         whiteOccupancy = pieces[0] | pieces[1] | pieces[2] | pieces[3] | pieces[4] | pieces[5];
         blackOccupancy = pieces[6] | pieces[7] | pieces[8] | pieces[9] | pieces[10] | pieces[11];
@@ -88,7 +91,6 @@ public class Bitboard {
         for (int i = 0; i < pieces.length; i++) {
             newBB.pieces[i] = pieces[i];
         }
-        newBB.isWhite = isWhite;
         return newBB;
     }
 
@@ -480,10 +482,6 @@ public class Bitboard {
             }
         }
         return possibleMoves;
-    }
-
-    public void switchPlayer() {
-        isWhite = !isWhite;
     }
 
     public boolean isKingInCheck(boolean isWhite) {
