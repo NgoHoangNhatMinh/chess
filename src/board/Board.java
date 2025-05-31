@@ -10,6 +10,7 @@ import static utils.OtherUtils.*;
 public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
+    private int enPassantSquare = -1;
 
     public void init() {
         bitboard = new Bitboard();
@@ -33,13 +34,20 @@ public class Board {
             System.out.println(move);
 
             System.out.println("These are the legal moves\n");
-            for (Move m : generateLegalMoves()) {
+            ArrayList<Move> legalMoves = generateLegalMoves();
+            for (Move m : legalMoves) {
                 System.out.println(m);
             }
 
+            Move selectedMove = null;
+            for (Move m : legalMoves) {
+                if (m.equals(new Move(moveString, isWhite))) {
+                    selectedMove = m;
+                }
+            }
             // If legal move, board make move
-            if (isLegalMove(move)) {
-                makeMove(move);
+            if (selectedMove != null) {
+                makeMove(selectedMove);
             } else {
                 System.out.println("This is not a legal move\n");
             }
@@ -105,8 +113,13 @@ public class Board {
             if (capturedPiece != -1) {
                 bitboard.removePiece(capturedPiece, to);
             }
+            if (move.isEnPassant) {
+                int removedFrom = isWhite ? to + 8 : to - 8;
+                bitboard.removePiece(isWhite ? 6 : 0, removedFrom);
+            }
             bitboard.addPiece(piece, to);
 
+            // Handle castling's rights
             if (piece == 3) {
                 if (from == 63)
                     bitboard.canShortCastleWhite = false;
@@ -131,6 +144,18 @@ public class Board {
                 else if (to == 0)
                     bitboard.canLongCastleBlack = false;
             }
+
+            // Check for en passant
+            if (piece == 0 || piece == 6) {
+                if (Math.abs(from - to) == 16) { // double move
+                    enPassantSquare = isWhite ? from - 8 : from + 8; // square behind the double pawn push
+                } else {
+                    enPassantSquare = -1;
+                }
+            } else {
+                enPassantSquare = -1;
+            }
+            bitboard.enPassantSquare = enPassantSquare;
         }
 
         bitboard.updateOccupancy();

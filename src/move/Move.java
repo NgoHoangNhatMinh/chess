@@ -11,6 +11,7 @@ public class Move {
     public boolean isWhite;
     public boolean isShortCastling;
     public boolean isLongCastling;
+    public boolean isEnPassant;
 
     public Move(String move, boolean isWhite) {
         piecesMap.put("WP", 0);
@@ -93,6 +94,13 @@ public class Move {
         this.piece = piece;
     }
 
+    public Move(int from, int to, int piece, boolean isEnPassant) {
+        this.from = from;
+        this.to = to;
+        this.piece = piece;
+        this.isEnPassant = isEnPassant;
+    }
+
     public static int toNum(String s) {
         char l = s.toLowerCase().charAt(0);
         char n = s.charAt(1);
@@ -119,8 +127,9 @@ public class Move {
         if (this == o)
             return true;
         if (o instanceof Move m) {
-            return isLongCastling || isShortCastling
-                    || ((this.piece == m.piece) && (this.from == m.from) && (this.to == m.to));
+            if (isLongCastling || isShortCastling)
+                return this.isLongCastling == m.isLongCastling || this.isShortCastling == m.isShortCastling;
+            return ((this.piece == m.piece) && (this.from == m.from) && (this.to == m.to));
         }
         return false;
     }

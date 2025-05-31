@@ -34,8 +34,8 @@ public class Bitboard {
     public boolean canLongCastleWhite;
     public boolean canShortCastleBlack;
     public boolean canLongCastleBlack;
-    private boolean[] whiteEnPassant = new boolean[8];
-    private boolean[] blackEnPassant = new boolean[8];
+
+    public int enPassantSquare;
 
     private boolean isGameOver;
 
@@ -295,6 +295,16 @@ public class Bitboard {
 
         while (pawns != 0) {
             int from = Long.numberOfTrailingZeros(pawns);
+
+            if (enPassantSquare != -1) {
+                if (isWhite && (from / 8 == 3) && Math.abs(enPassantSquare % 8 - from % 8) == 1) {
+                    possibleMoves.add(new Move(from, enPassantSquare, 0, true));
+                }
+                if (!isWhite && (from / 8 == 4) && Math.abs(enPassantSquare % 8 - from % 8) == 1) {
+                    possibleMoves.add(new Move(from, enPassantSquare, 6, true));
+                }
+            }
+
             long possible = isWhite ? whitePawnAttacks[from] : blackPawnAttacks[from];
             possible &= opponentOccupancy;
 
