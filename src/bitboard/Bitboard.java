@@ -3,7 +3,8 @@ package bitboard;
 import static utils.BitUtils.print;
 
 import java.util.ArrayList;
-import utils.Move;
+
+import move.Move;
 
 enum PE {
     WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
@@ -29,6 +30,15 @@ public class Bitboard {
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
     boolean isWhite = true;
 
+    private boolean canShortCastleWhite;
+    private boolean canLongCastleWhite;
+    private boolean canShortCastleBlack;
+    private boolean canLongCastleBlack;
+    private boolean[] whiteEnPassant = new boolean[8];
+    private boolean[] blackEnPassant = new boolean[8];
+
+    private boolean isGameOver;
+
     static {
         initAttacks();
         MagicBitboards.init();
@@ -48,6 +58,12 @@ public class Bitboard {
         pieces[9] = 0x0000000000000081L;
         pieces[10] = 0x0000000000000008L;
         pieces[11] = 0x0000000000000010L;
+
+        canShortCastleWhite = true;
+        canLongCastleWhite = true;
+        canShortCastleBlack = true;
+        canLongCastleBlack = true;
+
         updateOccupancy();
     }
 
@@ -151,6 +167,40 @@ public class Bitboard {
             }
         }
         return -1;
+    }
+
+    public void shortCastle(boolean isWhite) {
+        int king = isWhite ? 5 : 11;
+        int rook = isWhite ? 3 : 9;
+        int kingFrom = isWhite ? 60 : 4;
+        int kingTo = isWhite ? 62 : 6;
+        int rookFrom = isWhite ? 63 : 7;
+        int rookTo = isWhite ? 61 : 5;
+
+        pieces[king] &= ~(1L << kingFrom);
+        pieces[rook] &= ~(1L << rookFrom);
+
+        pieces[king] |= (1L << kingTo);
+        pieces[rook] |= (1L << rookTo);
+
+        updateOccupancy();
+    }
+
+    public void longCastle(boolean isWhite) {
+        int king = isWhite ? 5 : 11;
+        int rook = isWhite ? 3 : 9;
+        int kingFrom = isWhite ? 60 : 4;
+        int kingTo = isWhite ? 58 : 2;
+        int rookFrom = isWhite ? 56 : 0;
+        int rookTo = isWhite ? 59 : 3;
+
+        pieces[king] &= ~(1L << kingFrom);
+        pieces[rook] &= ~(1L << rookFrom);
+
+        pieces[king] |= (1L << kingTo);
+        pieces[rook] |= (1L << rookTo);
+
+        updateOccupancy();
     }
 
     public ArrayList<Move> generateKnightMoves(boolean isWhite) {
@@ -361,6 +411,31 @@ public class Bitboard {
     public ArrayList<Move> generateCastlingMoves(boolean isWhite) {
         ArrayList<Move> possibleMoves = new ArrayList<>();
 
+        boolean canShortCastle = isWhite ? canShortCastleWhite : canShortCastleBlack;
+        boolean canLongCastle = isWhite ? canLongCastleWhite : canLongCastleBlack;
+
+        if (canShortCastle) {
+            boolean empty = isWhite
+                    ? ((occupancy & ((1L << 61) | (1L << 62))) == 0)
+                    : ((occupancy & ((1L << 5) | (1L << 6))) == 0);
+            boolean safe = !isKingInCheck(isWhite)
+                    && !isKingInCheck(isWhite, isWhite ? 61 : 5)
+                    && !isKingInCheck(isWhite, isWhite ? 62 : 6);
+            if (empty && safe) {
+                possibleMoves.add(new Move("0-0", isWhite));
+            }
+        }
+        if (canLongCastle) {
+            boolean empty = isWhite
+                    ? ((occupancy & ((1L << 59) | (1L << 58))) == 0)
+                    : ((occupancy & ((1L << 3) | (1L << 2))) == 0);
+            boolean safe = !isKingInCheck(isWhite)
+                    && !isKingInCheck(isWhite, isWhite ? 59 : 3)
+                    && !isKingInCheck(isWhite, isWhite ? 58 : 2);
+            if (empty && safe) {
+                possibleMoves.add(new Move("0-0-0", isWhite));
+            }
+        }
         return possibleMoves;
     }
 
@@ -405,6 +480,19 @@ public class Bitboard {
             return true;
 
         return false;
+    }
+
+    public boolean isKingInCheck(boolean isWhite, int from) {
+        int king = isWhite ? 5 : 11;
+        long original = pieces[king];
+        pieces[king] = 1L << from;
+        boolean isChecked = isKingInCheck(isWhite);
+        pieces[king] = original;
+        return isChecked;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
     }
 
     @Override

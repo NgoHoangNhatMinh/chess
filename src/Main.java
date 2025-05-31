@@ -5,6 +5,5 @@ class Main {
         Board board = new Board();
         board.init();
         board.run();
-        return;
     }
 }

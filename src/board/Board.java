@@ -1,7 +1,8 @@
 package board;
 
-import utils.Move;
 import bitboard.Bitboard;
+import move.Move;
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import static utils.OtherUtils.*;
@@ -9,26 +10,17 @@ import static utils.OtherUtils.*;
 public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
-    private boolean whiteCastle;
-    private boolean blackCastle;
-    private boolean[] whiteEnPassant = new boolean[8];
-    private boolean[] blackEnPassant = new boolean[8];
-    private boolean isGameOver;
 
     public void init() {
         bitboard = new Bitboard();
         bitboard.init();
         isWhite = true;
-        whiteCastle = false;
-        blackCastle = false;
-        // Whitea and black en passant are false
-        isGameOver = false;
     }
 
     public void run() {
         clearScreen();
         Scanner scanner = new Scanner(System.in);
-        while (!isGameOver) {
+        while (!bitboard.isGameOver()) {
             System.out.println(bitboard);
 
             // Inputting move
@@ -37,18 +29,19 @@ public class Board {
             String moveString = scanner.nextLine();
             Move move = new Move(moveString, isWhite);
 
-            clearScreen();
+            // clearScreen();
             System.out.println(move);
+
+            System.out.println("These are the legal moves\n");
+            for (Move m : generateLegalMoves()) {
+                System.out.println(m);
+            }
 
             // If legal move, board make move
             if (isLegalMove(move)) {
                 makeMove(move);
             } else {
                 System.out.println("This is not a legal move\n");
-                System.out.println("These are the legal moves\n");
-                for (Move m : generateLegalMoves()) {
-                    System.out.println(m);
-                }
             }
         }
         scanner.close();
@@ -58,11 +51,6 @@ public class Board {
         Board newBoard = new Board();
         newBoard.bitboard = bitboard.copy();
         newBoard.isWhite = isWhite;
-        newBoard.whiteCastle = whiteCastle;
-        newBoard.blackCastle = blackCastle;
-        newBoard.isGameOver = isGameOver;
-        newBoard.whiteEnPassant = whiteEnPassant.clone();
-        newBoard.blackEnPassant = this.blackEnPassant.clone();
         return newBoard;
     }
 
@@ -102,19 +90,24 @@ public class Board {
     }
 
     public void makeMove(Move move) {
-        int from = move.from;
-        int to = move.to;
-        int piece = move.piece;
+        if (move.isShortCastling) {
+            bitboard.shortCastle(isWhite);
+        } else if (move.isLongCastling) {
+            bitboard.longCastle(isWhite);
+        } else {
+            int from = move.from;
+            int to = move.to;
+            int piece = move.piece;
 
-        // remove piece from source
-        bitboard.removePiece(piece, from);
-        int capturedPiece = bitboard.getPieceAt(to);
-        if (capturedPiece != -1) {
-            bitboard.removePiece(capturedPiece, from);
+            // remove piece from source
+            bitboard.removePiece(piece, from);
+            int capturedPiece = bitboard.getPieceAt(to);
+            if (capturedPiece != -1) {
+                bitboard.removePiece(capturedPiece, to);
+            }
+            bitboard.addPiece(piece, to);
         }
-        bitboard.addPiece(piece, to);
         bitboard.updateOccupancy();
-        // switch player
         switchPlayer();
     }
 
