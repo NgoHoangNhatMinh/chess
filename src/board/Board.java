@@ -106,7 +106,33 @@ public class Board {
                 bitboard.removePiece(capturedPiece, to);
             }
             bitboard.addPiece(piece, to);
+
+            if (piece == 3) {
+                if (from == 63)
+                    bitboard.canShortCastleWhite = false;
+                else if (from == 56)
+                    bitboard.canLongCastleWhite = false;
+            } else if (piece == 9) {
+                if (from == 7)
+                    bitboard.canShortCastleBlack = false;
+                else if (from == 0)
+                    bitboard.canLongCastleBlack = false;
+            } else if (piece == 5 || piece == 11)
+                bitboard.disableCastle(isWhite);
+
+            if (capturedPiece == 3) {
+                if (to == 63)
+                    bitboard.canShortCastleWhite = false;
+                else if (to == 56)
+                    bitboard.canLongCastleWhite = false;
+            } else if (capturedPiece == 9) {
+                if (to == 7)
+                    bitboard.canShortCastleBlack = false;
+                else if (to == 0)
+                    bitboard.canLongCastleBlack = false;
+            }
         }
+
         bitboard.updateOccupancy();
         switchPlayer();
     }

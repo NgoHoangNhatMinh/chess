@@ -30,10 +30,10 @@ public class Bitboard {
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
     boolean isWhite = true;
 
-    private boolean canShortCastleWhite;
-    private boolean canLongCastleWhite;
-    private boolean canShortCastleBlack;
-    private boolean canLongCastleBlack;
+    public boolean canShortCastleWhite;
+    public boolean canLongCastleWhite;
+    public boolean canShortCastleBlack;
+    public boolean canLongCastleBlack;
     private boolean[] whiteEnPassant = new boolean[8];
     private boolean[] blackEnPassant = new boolean[8];
 
@@ -183,6 +183,8 @@ public class Bitboard {
         pieces[king] |= (1L << kingTo);
         pieces[rook] |= (1L << rookTo);
 
+        disableCastle(isWhite);
+
         updateOccupancy();
     }
 
@@ -200,7 +202,19 @@ public class Bitboard {
         pieces[king] |= (1L << kingTo);
         pieces[rook] |= (1L << rookTo);
 
+        disableCastle(isWhite);
+
         updateOccupancy();
+    }
+
+    public void disableCastle(boolean isWhite) {
+        if (isWhite) {
+            canShortCastleWhite = false;
+            canLongCastleWhite = false;
+        } else {
+            canShortCastleBlack = false;
+            canLongCastleBlack = false;
+        }
     }
 
     public ArrayList<Move> generateKnightMoves(boolean isWhite) {
