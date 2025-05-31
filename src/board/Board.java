@@ -11,6 +11,7 @@ public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
     private int enPassantSquare = -1;
+    private int halfMovesTillDraw = 0;
 
     public void init() {
         bitboard = new Bitboard();
@@ -36,6 +37,9 @@ public class Board {
                     System.out.println("The game is a draw");
                 break;
             }
+
+            if (halfMovesTillDraw == 0)
+                System.out.println("The game is a draw");
 
             // Inputting move
             System.out.println((isWhite ? "White" : "Black") + " to move: ");
@@ -114,11 +118,15 @@ public class Board {
             int to = move.to;
             int piece = move.piece;
 
+            if (piece == 0 || piece == 6)
+                halfMovesTillDraw = 0;
+
             // remove piece from source
             bitboard.removePiece(piece, from);
             int capturedPiece = bitboard.getPieceAt(to);
             if (capturedPiece != -1) {
                 bitboard.removePiece(capturedPiece, to);
+                halfMovesTillDraw = 0;
             }
             if (move.isEnPassant) {
                 int removedFrom = isWhite ? to + 8 : to - 8;
@@ -168,6 +176,7 @@ public class Board {
             bitboard.enPassantSquare = enPassantSquare;
         }
 
+        halfMovesTillDraw++;
         bitboard.updateOccupancy();
         switchPlayer();
     }
