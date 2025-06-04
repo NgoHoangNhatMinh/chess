@@ -1,9 +1,7 @@
 package bitboard;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Random;
-import java.util.HashMap;
 
 import move.Move;
 
@@ -594,6 +592,21 @@ public class Bitboard {
         }
 
         return hash;
+    }
+
+    public boolean isInsufficientMaterial() {
+        if ((pieces[0] | pieces[6]) == 0) { // No pawns
+            int whitePieces = Long.bitCount(pieces[1] | pieces[2] | pieces[3] | pieces[4] | pieces[5]);
+            int blackPieces = Long.bitCount(pieces[7] | pieces[8] | pieces[9] | pieces[10] | pieces[11]);
+            if (whitePieces <= 1 && blackPieces <= 1) {
+                return true; // Only kings or one minor piece each
+            }
+        }
+        if (Long.bitCount(pieces[2]) == 1 && Long.bitCount(pieces[8]) == 1) {
+            // Only one bishop each on opposite colors
+            return Long.numberOfTrailingZeros(pieces[2]) % 2 != Long.numberOfTrailingZeros(pieces[8]) % 2;
+        }
+        return false;
     }
 
     public void switchPlayer() {

@@ -44,17 +44,24 @@ public class Board {
                 if (bitboard.isKingInCheck(isWhite))
                     System.out.println((isWhite ? "White" : "Black") + " is checkmated");
                 else
-                    System.out.println("The game is a draw");
+                    System.out.println("The game is a draw by stalemate");
                 break;
             }
-
             if (halfMovesTillDraw == 0) {
-                System.out.println("The game is a draw");
+                System.out.println("The game is a draw by 50-move rule");
                 break;
             }
             if (isThreefoldRepetition()) {
                 System.out.println("The game is a draw by threefold repetition");
                 break;
+            }
+            if (bitboard.isInsufficientMaterial()) {
+                System.out.println("The game is a draw by insufficient material");
+                break;
+            }
+
+            if (bitboard.isKingInCheck(isWhite)) {
+                System.out.println((isWhite ? "White" : "Black") + " is in check");
             }
 
             // Inputting move
