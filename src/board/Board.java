@@ -14,10 +14,10 @@ public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
     private int enPassantSquare = -1;
-    private int halfMovesTillDraw = 50;
+    private int halfMovesTillDraw = 100;
     private Map<Long, Integer> zobristMap = new HashMap<>();
 
-    private boolean isWhiteBot = true;
+    private boolean isWhiteBot = false;
     private boolean isBlackBot = !isWhiteBot;
 
     public void init() {
@@ -218,7 +218,7 @@ public class Board {
             bitboard.enPassantSquare = enPassantSquare;
         }
 
-        halfMovesTillDraw++;
+        halfMovesTillDraw--;
         bitboard.updateOccupancy();
         switchPlayer();
         bitboard.switchPlayer();
