@@ -101,8 +101,6 @@ public class Bitboard {
         occupancy = whiteOccupancy | blackOccupancy;
         emptyOccupancy = ~occupancy;
         pieces[12] = emptyOccupancy;
-
-        long hash = zobristHash();
     }
 
     // Generate the loopup attacks table for knight and king
