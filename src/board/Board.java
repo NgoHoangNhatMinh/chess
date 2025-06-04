@@ -5,13 +5,17 @@ import move.Move;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import static utils.OtherUtils.*;
 
 public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
     private int enPassantSquare = -1;
-    private int halfMovesTillDraw = 0;
+    private int halfMovesTillDraw = 50;
+    private Map<Long, Integer> zobristMap = new HashMap<>();
 
     public void init() {
         bitboard = new Bitboard();
@@ -31,10 +35,10 @@ public class Board {
             System.out.println(bitboard);
 
             ArrayList<Move> legalMoves = generateLegalMoves();
-            for (Move m : legalMoves) {
-                // For debugging
-                System.out.println(m);
-            }
+            // for (Move m : legalMoves) {
+            // // For debugging
+            // System.out.println(m);
+            // }
 
             if (legalMoves.isEmpty()) {
                 if (bitboard.isKingInCheck(isWhite))
@@ -44,8 +48,14 @@ public class Board {
                 break;
             }
 
-            if (halfMovesTillDraw == 0)
+            if (halfMovesTillDraw == 0) {
                 System.out.println("The game is a draw");
+                break;
+            }
+            if (isThreefoldRepetition()) {
+                System.out.println("The game is a draw by threefold repetition");
+                break;
+            }
 
             // Inputting move
             System.out.println((isWhite ? "White" : "Black") + " to move: ");
@@ -65,6 +75,9 @@ public class Board {
             // If legal move, board make move
             if (selectedMove != null) {
                 makeMove(selectedMove);
+                long hash = bitboard.zobristHash();
+                zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
+                System.out.println("Zobrist Hash: " + hash + ", Count: " + zobristMap.get(hash));
             } else {
                 System.out.println("This is not a legal move\n");
             }
@@ -185,6 +198,13 @@ public class Board {
         halfMovesTillDraw++;
         bitboard.updateOccupancy();
         switchPlayer();
+        bitboard.switchPlayer();
+
+    }
+
+    public boolean isThreefoldRepetition() {
+        long hash = bitboard.zobristHash();
+        return zobristMap.getOrDefault(hash, 0) >= 3;
     }
 
     public void switchPlayer() {

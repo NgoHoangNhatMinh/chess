@@ -1,6 +1,9 @@
 package bitboard;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Random;
+import java.util.HashMap;
 
 import move.Move;
 
@@ -27,12 +30,19 @@ public class Bitboard {
     long[] pieces = new long[13];
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
 
+    public boolean isWhiteToMove = true;
+
     public boolean canShortCastleWhite;
     public boolean canLongCastleWhite;
     public boolean canShortCastleBlack;
     public boolean canLongCastleBlack;
 
     public int enPassantSquare;
+
+    public static long[][] zobristPiece = new long[12][64];
+    public static long[] zobristCastle = new long[16];
+    public static long[] zobristEnPassant = new long[8];
+    public static long zobristWhiteToMove;
 
     private boolean isGameOver;
 
@@ -61,6 +71,24 @@ public class Bitboard {
         canShortCastleBlack = true;
         canLongCastleBlack = true;
 
+        Random random = new Random();
+
+        for (int i = 0; i < zobristPiece.length; i++) {
+            for (int j = 0; j < zobristPiece[i].length; j++) {
+                zobristPiece[i][j] = random.nextLong();
+            }
+        }
+
+        for (int i = 0; i < zobristCastle.length; i++) {
+            zobristCastle[i] = random.nextLong();
+        }
+
+        for (int i = 0; i < zobristEnPassant.length; i++) {
+            zobristEnPassant[i] = random.nextLong();
+        }
+
+        zobristWhiteToMove = random.nextLong();
+
         updateOccupancy();
     }
 
@@ -68,12 +96,15 @@ public class Bitboard {
 
     }
 
+    // Update occupancy after a move and save the hash of the position
     public void updateOccupancy() {
         whiteOccupancy = pieces[0] | pieces[1] | pieces[2] | pieces[3] | pieces[4] | pieces[5];
         blackOccupancy = pieces[6] | pieces[7] | pieces[8] | pieces[9] | pieces[10] | pieces[11];
         occupancy = whiteOccupancy | blackOccupancy;
         emptyOccupancy = ~occupancy;
         pieces[12] = emptyOccupancy;
+
+        long hash = zobristHash();
     }
 
     // Generate the loopup attacks table for knight and king
@@ -530,6 +561,43 @@ public class Bitboard {
         boolean isChecked = isKingInCheck(isWhite);
         pieces[king] = original;
         return isChecked;
+    }
+
+    public long zobristHash() {
+        long hash = 0L;
+        for (int i = 0; i < 12; i++) {
+            long bitboard = pieces[i];
+            while (bitboard != 0) {
+                int sq = Long.numberOfTrailingZeros(bitboard);
+                hash ^= zobristPiece[i][sq];
+                bitboard &= bitboard - 1;
+            }
+        }
+
+        int castle = 0;
+        if (canShortCastleWhite)
+            castle |= 1;
+        if (canLongCastleWhite)
+            castle |= 2;
+        if (canShortCastleBlack)
+            castle |= 4;
+        if (canLongCastleBlack)
+            castle |= 8;
+        hash ^= zobristCastle[castle];
+
+        if (enPassantSquare != -1) {
+            hash ^= zobristEnPassant[enPassantSquare % 8]; // Only the file is needed for the hash
+        }
+
+        if (!isWhiteToMove) {
+            hash ^= zobristWhiteToMove;
+        }
+
+        return hash;
+    }
+
+    public void switchPlayer() {
+        isWhiteToMove = !isWhiteToMove;
     }
 
     public boolean isGameOver() {
