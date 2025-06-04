@@ -17,6 +17,9 @@ public class Board {
     private int halfMovesTillDraw = 50;
     private Map<Long, Integer> zobristMap = new HashMap<>();
 
+    private boolean isWhiteBot = true;
+    private boolean isBlackBot = !isWhiteBot;
+
     public void init() {
         bitboard = new Bitboard();
         bitboard.init();
@@ -67,6 +70,18 @@ public class Board {
             // Inputting move
             System.out.println((isWhite ? "White" : "Black") + " to move: ");
 
+            if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
+                // Bot move generation
+                Move botMove = legalMoves.get((int) (Math.random() * legalMoves.size()));
+                System.out.println("Bot chose: " + botMove);
+                makeMove(botMove);
+                long hash = bitboard.zobristHash();
+                zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
+                // System.out.println("Zobrist Hash: " + hash + ", Count: " +
+                // zobristMap.get(hash));
+                continue;
+            }
+
             String moveString = scanner.nextLine();
             Move move = new Move(moveString, isWhite);
 
@@ -84,7 +99,8 @@ public class Board {
                 makeMove(selectedMove);
                 long hash = bitboard.zobristHash();
                 zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
-                System.out.println("Zobrist Hash: " + hash + ", Count: " + zobristMap.get(hash));
+                // System.out.println("Zobrist Hash: " + hash + ", Count: " +
+                // zobristMap.get(hash));
             } else {
                 System.out.println("This is not a legal move\n");
             }
