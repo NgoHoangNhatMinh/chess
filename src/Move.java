@@ -1,7 +1,5 @@
-package move;
 
 import java.util.HashMap;
-import bitboard.*;
 
 public class Move {
     HashMap<String, Integer> piecesMap = new HashMap<String, Integer>();

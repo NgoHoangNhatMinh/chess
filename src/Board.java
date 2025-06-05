@@ -1,14 +1,9 @@
-package board;
-
-import bitboard.Bitboard;
-import move.Move;
 
 import java.util.Scanner;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import static utils.OtherUtils.*;
 
 public class Board {
     private Bitboard bitboard;
@@ -32,7 +27,7 @@ public class Board {
     }
 
     public void run() {
-        clearScreen();
+        OtherUtils.clearScreen();
         Scanner scanner = new Scanner(System.in);
         while (!bitboard.isGameOver()) {
             System.out.println(bitboard);
@@ -72,7 +67,7 @@ public class Board {
 
             if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
                 // Bot move generation
-                Move botMove = legalMoves.get((int) (Math.random() * legalMoves.size()));
+                Move botMove = Engine.generateBestMove(legalMoves);
                 System.out.println("Bot chose: " + botMove);
                 makeMove(botMove);
                 long hash = bitboard.zobristHash();

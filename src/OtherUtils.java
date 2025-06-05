@@ -1,4 +1,3 @@
-package utils;
 
 public class OtherUtils {
     public static void clearScreen() {

@@ -1,10 +1,9 @@
-package utils;
 
 public class BitUtils {
     public static void print(long board) {
         // String boardStr = "";
         for (int i = 0; i < 8; i++) {
-            // boardStr += (8 - i) + "   ";
+            // boardStr += (8 - i) + " ";
             System.out.print((8 - i) + "   ");
             for (int j = 0; j < 8; j++) {
                 int offset = i * 8 + j;

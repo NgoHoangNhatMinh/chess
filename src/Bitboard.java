@@ -1,9 +1,6 @@
-package bitboard;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-import move.Move;
 
 enum PE {
     WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK

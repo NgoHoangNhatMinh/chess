@@ -1,4 +1,3 @@
-package bitboard;
 
 import java.util.Random;
 import java.util.Arrays;

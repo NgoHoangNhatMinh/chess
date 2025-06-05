@@ -1,4 +1,3 @@
-package ui;
 
 class UCI {
 
