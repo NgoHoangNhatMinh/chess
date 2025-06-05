@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class Board {
     private Bitboard bitboard;
@@ -14,6 +15,8 @@ public class Board {
 
     private boolean isWhiteBot = false;
     private boolean isBlackBot = !isWhiteBot;
+
+    private Stack<Board> gameHistory = new Stack<>();
 
     public void init() {
         bitboard = new Bitboard();
@@ -107,6 +110,14 @@ public class Board {
         Board newBoard = new Board();
         newBoard.bitboard = bitboard.copy();
         newBoard.isWhite = isWhite;
+        newBoard.enPassantSquare = enPassantSquare;
+        newBoard.halfMovesTillDraw = halfMovesTillDraw;
+        for (Long key : zobristMap.keySet()) {
+            newBoard.zobristMap.put(key, zobristMap.get(key));
+        }
+
+        newBoard.isWhiteBot = isWhiteBot;
+        newBoard.isBlackBot = isBlackBot;
         return newBoard;
     }
 
@@ -146,6 +157,10 @@ public class Board {
     }
 
     public void makeMove(Move move) {
+        // Save current state for undo functionality
+        gameHistory.push(this.copy());
+
+        // Make move
         if (move.isShortCastling) {
             bitboard.shortCastle(isWhite);
         } else if (move.isLongCastling) {
@@ -216,8 +231,24 @@ public class Board {
         halfMovesTillDraw--;
         bitboard.updateOccupancy();
         switchPlayer();
-        bitboard.switchPlayer();
+    }
 
+    public void undoMove() {
+        if (gameHistory.isEmpty()) {
+            System.out.println("No moves to undo");
+            return;
+        }
+        Board previousBoard = gameHistory.pop();
+        this.bitboard = previousBoard.bitboard.copy();
+        this.isWhite = previousBoard.isWhite;
+        this.enPassantSquare = previousBoard.enPassantSquare;
+        this.halfMovesTillDraw = previousBoard.halfMovesTillDraw;
+        this.zobristMap = new HashMap<>(previousBoard.zobristMap);
+        this.isWhiteBot = previousBoard.isWhiteBot;
+        this.isBlackBot = previousBoard.isBlackBot;
+        bitboard.updateOccupancy();
+        switchPlayer();
+        isWhite = !isWhite; // Switch player back to the previous player
     }
 
     public boolean isThreefoldRepetition() {
@@ -227,5 +258,6 @@ public class Board {
 
     public void switchPlayer() {
         isWhite = !isWhite;
+        bitboard.switchPlayer();
     }
 }

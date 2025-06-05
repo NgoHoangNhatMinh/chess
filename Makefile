@@ -23,3 +23,9 @@ run:
 clean:
 	@echo "Cleaning folder..."
 	@rm -rf $(OUT_DIR)
+
+test:
+	@echo "Running tests..."
+	@mkdir -p $(OUT_DIR)
+	@javac -d $(OUT_DIR) $(SOURCE)
+	@java -cp $(OUT_DIR) Perft
