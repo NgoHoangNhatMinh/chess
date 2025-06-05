@@ -28,4 +28,4 @@ test:
 	@echo "Running tests..."
 	@mkdir -p $(OUT_DIR)
 	@javac -d $(OUT_DIR) $(SOURCE)
-	@java -cp $(OUT_DIR) Perft
+	@java -cp $(OUT_DIR) Perft $(DEPTH)
