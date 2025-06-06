@@ -138,7 +138,7 @@ public class Bitboard {
         if (enPassant.equals("-")) {
             enPassantSquare = -1;
         } else {
-            int enPassantSquare = Move.toNum(enPassant);
+            enPassantSquare = Move.toNum(enPassant);
             if (enPassantSquare < 0 || enPassantSquare > 63) {
                 throw new IllegalArgumentException("Invalid en passant square in FEN string");
             }
@@ -396,6 +396,7 @@ public class Bitboard {
             int from = Long.numberOfTrailingZeros(pawns);
 
             if (enPassantSquare != -1) {
+                // System.out.println("En passant square: " + enPassantSquare);
                 if (isWhite && (from / 8 == 3) && Math.abs(enPassantSquare % 8 - from % 8) == 1) {
                     possibleMoves.add(new Move(from, enPassantSquare, 0, true));
                 }
@@ -563,8 +564,8 @@ public class Bitboard {
         }
         if (canLongCastle) {
             boolean empty = isWhite
-                    ? ((occupancy & ((1L << 59) | (1L << 58))) == 0)
-                    : ((occupancy & ((1L << 3) | (1L << 2))) == 0);
+                    ? ((occupancy & ((1L << 59) | (1L << 58) | (1L << 57))) == 0)
+                    : ((occupancy & ((1L << 3) | (1L << 2) | (1L << 1))) == 0);
             boolean safe = !isKingInCheck(isWhite)
                     && !isKingInCheck(isWhite, isWhite ? 59 : 3)
                     && !isKingInCheck(isWhite, isWhite ? 58 : 2);

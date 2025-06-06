@@ -19,16 +19,16 @@ public class Perft {
     static Map<String, Map<Integer, Long>> knownPerft = new LinkedHashMap<>();
     static {
         // // 1. Starting position
-        // Map<Integer, Long> start = new HashMap<>();
-        // start.put(1, 20L);
-        // start.put(2, 400L);
-        // start.put(3, 8902L);
-        // start.put(4, 197281L);
-        // start.put(5, 4865609L);
-        // start.put(6, 119060324L);
-        // start.put(7, 3195901860L);
-        // knownPerft.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-        // start);
+        Map<Integer, Long> start = new HashMap<>();
+        start.put(1, 20L);
+        start.put(2, 400L);
+        start.put(3, 8902L);
+        start.put(4, 197281L);
+        start.put(5, 4865609L);
+        start.put(6, 119060324L);
+        start.put(7, 3195901860L);
+        knownPerft.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                start);
 
         // 2. Kiwipete
         Map<Integer, Long> kiwipete = new HashMap<>();
@@ -41,16 +41,52 @@ public class Perft {
         kiwipete.put(7, 34661140543L);
         knownPerft.put("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", kiwipete);
 
+        // Investigate kiwipete after white Knight e5 to f7
+        // Map<Integer, Long> kiwipete2 = new HashMap<>();
+        // kiwipete2.put(1, 0L);
+        // kiwipete2.put(2, 0L);
+        // kiwipete2.put(3, 0L);
+        // kiwipete2.put(4, 0L);
+        // kiwipete2.put(5, 0L);
+        // kiwipete2.put(6, 0L);
+        // kiwipete2.put(7, 0L);
+        // knownPerft.put("r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq
+        // - 0 1", kiwipete2);
+
+        // Investigate kiwipete after white Knight e5 to f7 then c7c5
+        // Map<Integer, Long> kiwipete3 = new HashMap<>();
+        // kiwipete3.put(1, 0L);
+        // kiwipete3.put(2, 0L);
+        // kiwipete3.put(3, 0L);
+        // kiwipete3.put(4, 0L);
+        // kiwipete3.put(5, 0L);
+        // kiwipete3.put(6, 0L);
+        // kiwipete3.put(7, 0L);
+        // knownPerft.put("r3k2r/p2pqNb1/bn2pnp1/2pP4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq
+        // c6 0 2", kiwipete3);
+
+        // This is the problem -> some castling moves did not reset en passant square
+        // Map<Integer, Long> kiwipete4 = new HashMap<>();
+        // kiwipete4.put(1, 0L);
+        // kiwipete4.put(2, 0L);
+        // kiwipete4.put(3, 0L);
+        // kiwipete4.put(4, 0L);
+        // kiwipete4.put(5, 0L);
+        // kiwipete4.put(6, 0L);
+        // kiwipete4.put(7, 0L);
+        // knownPerft.put("r3k2r/p2pqNb1/bn2pnp1/2pP4/1p2P3/2N2Q1p/PPPBBPPP/R4RK1 b kq
+        // c6 1 2", kiwipete4);
+
         // 3. Position 3
-        // Map<Integer, Long> pos3 = new HashMap<>();
-        // pos3.put(1, 14L);
-        // pos3.put(2, 191L);
-        // pos3.put(3, 2812L);
-        // pos3.put(4, 43238L);
-        // pos3.put(5, 674624L);
-        // pos3.put(6, 11030083L);
-        // pos3.put(7, 178633661L);
-        // knownPerft.put("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1", pos3);
+        Map<Integer, Long> pos3 = new HashMap<>();
+        pos3.put(1, 14L);
+        pos3.put(2, 191L);
+        pos3.put(3, 2812L);
+        pos3.put(4, 43238L);
+        pos3.put(5, 674624L);
+        pos3.put(6, 11030083L);
+        pos3.put(7, 178633661L);
+        knownPerft.put("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1", pos3);
 
         // 4. Position 4
         Map<Integer, Long> pos4 = new HashMap<>();
@@ -64,28 +100,27 @@ public class Perft {
         knownPerft.put("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", pos4);
 
         // 5. Position 5
-        // Map<Integer, Long> pos5 = new HashMap<>();
-        // pos5.put(1, 44L);
-        // pos5.put(2, 1486L);
-        // pos5.put(3, 62379L);
-        // pos5.put(4, 2103487L);
-        // pos5.put(5, 89941194L);
-        // pos5.put(6, 3243631744L);
-        // pos5.put(7, 119265043504L);
-        // knownPerft.put("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
-        // pos5);
+        Map<Integer, Long> pos5 = new HashMap<>();
+        pos5.put(1, 44L);
+        pos5.put(2, 1486L);
+        pos5.put(3, 62379L);
+        pos5.put(4, 2103487L);
+        pos5.put(5, 89941194L);
+        pos5.put(6, 3243631744L);
+        pos5.put(7, 119265043504L);
+        knownPerft.put("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+                pos5);
 
         // 6. Position 6
-        // Map<Integer, Long> pos6 = new HashMap<>();
-        // pos6.put(1, 46L);
-        // pos6.put(2, 2079L);
-        // pos6.put(3, 89890L);
-        // pos6.put(4, 3894594L);
-        // pos6.put(5, 164075551L);
-        // pos6.put(6, 6923051137L);
-        // pos6.put(7, 287188994746L);
-        // knownPerft.put("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1
-        // w - - 0 10", pos6);
+        Map<Integer, Long> pos6 = new HashMap<>();
+        pos6.put(1, 46L);
+        pos6.put(2, 2079L);
+        pos6.put(3, 89890L);
+        pos6.put(4, 3894594L);
+        pos6.put(5, 164075551L);
+        pos6.put(6, 6923051137L);
+        pos6.put(7, 287188994746L);
+        knownPerft.put("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", pos6);
     }
 
     public static void main(String[] args) {
@@ -137,6 +172,9 @@ public class Perft {
         }
     }
 
+    static ArrayList<Move> moveHistory = new ArrayList<>();
+    static long prevCounter = 0L;
+
     public static void perft(Board board, int depth, PerftCounters counters) {
         if (depth == 0) {
             counters.nodes++;
@@ -146,15 +184,7 @@ public class Perft {
         ArrayList<Move> legalMoves = board.generateLegalMoves();
         for (Move move : legalMoves) {
             board.makeMove(move);
-
-            // Debugging wrong PERFT values
-            // if (depth == 2) {
-            // System.out.println("Move: " + move + " | Number of moves: " + numMoves +
-            // "\n");
-            // System.out.println("\n----------------------------------------------------------------");
-            // }
-            // if (depth == 1)
-            // System.out.println("Move: " + move);
+            moveHistory.add(move);
 
             boolean isCapture = move.isCapture();
             boolean isEnPassant = move.isEnPassant();
@@ -167,8 +197,9 @@ public class Perft {
                     counters.captures++;
                 if (isEnPassant)
                     counters.enPassant++;
-                if (isCastling)
+                if (isCastling) {
                     counters.castling++;
+                }
                 if (isPromotion)
                     counters.promotions++;
                 if (isCheck)
@@ -177,8 +208,14 @@ public class Perft {
                     counters.checkmates++;
                 }
             }
+
             perft(board, depth - 1, counters);
+            // if (depth == 1) {
+            // System.out.println(move + ": " + (counters.nodes - prevCounter) + " nodes");
+            // prevCounter = counters.nodes;
+            // }
             board.undoMove();
+            moveHistory.remove(moveHistory.size() - 1);
         }
     }
 }

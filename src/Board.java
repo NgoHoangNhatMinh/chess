@@ -51,10 +51,6 @@ public class Board {
             System.out.println(bitboard);
 
             ArrayList<Move> legalMoves = generateLegalMoves();
-            System.out.println("Legal moves before undo: " + legalMoves.size());
-            for (Move move : legalMoves) {
-                System.out.println(move);
-            }
 
             if (legalMoves.isEmpty()) {
                 if (bitboard.isKingInCheck(isWhite))
@@ -81,7 +77,7 @@ public class Board {
             }
 
             // Inputting move
-            System.out.println((isWhite ? "White" : "Black") + " to move: ");
+            System.out.println(fullMoves + ". " + (isWhite ? "White" : "Black") + " to move: ");
 
             if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
                 // Bot move generation
@@ -177,8 +173,10 @@ public class Board {
         // Make move
         if (move.isShortCastling) {
             bitboard.shortCastle(isWhite);
+            bitboard.enPassantSquare = -1;
         } else if (move.isLongCastling) {
             bitboard.longCastle(isWhite);
+            bitboard.enPassantSquare = -1;
         } else {
             int from = move.from;
             int to = move.to;
