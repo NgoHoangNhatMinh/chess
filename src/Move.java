@@ -11,6 +11,7 @@ public class Move {
     public boolean isShortCastling;
     public boolean isLongCastling;
     public boolean isEnPassant;
+    public int capturedSquare = -1;
 
     public Move(String move, boolean isWhite) {
         piecesMap.put("WP", 0);
@@ -158,6 +159,22 @@ public class Move {
         char row = (char) ('1' + (7 - s / 8));
         char col = (char) ('a' + s % 8);
         return "" + col + row;
+    }
+
+    public boolean isPromotion() {
+        return promotionPiece != -1;
+    }
+
+    public boolean isCastling() {
+        return isShortCastling || isLongCastling;
+    }
+
+    public boolean isEnPassant() {
+        return isEnPassant;
+    }
+
+    public boolean isCapture() {
+        return capturedSquare != -1;
     }
 
     @Override

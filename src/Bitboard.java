@@ -22,6 +22,9 @@ public class Bitboard {
     static long[] whitePawnAttacks = new long[64];
     static long[] blackPawnAttacks = new long[64];
 
+    // Bitboard gamestate
+    // ----------------------------------------------------------------------
+
     long[] pieces = new long[13];
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
 
@@ -34,12 +37,14 @@ public class Bitboard {
 
     public int enPassantSquare;
 
+    private boolean isGameOver;
+
+    // ----------------------------------------------------------------------
+
     public static long[][] zobristPiece = new long[12][64];
     public static long[] zobristCastle = new long[16];
     public static long[] zobristEnPassant = new long[8];
     public static long zobristWhiteToMove;
-
-    private boolean isGameOver;
 
     static {
         initAttacks();
@@ -166,6 +171,17 @@ public class Bitboard {
         for (int i = 0; i < pieces.length; i++) {
             newBB.pieces[i] = pieces[i];
         }
+        newBB.whiteOccupancy = whiteOccupancy;
+        newBB.blackOccupancy = blackOccupancy;
+        newBB.occupancy = occupancy;
+        newBB.emptyOccupancy = emptyOccupancy;
+        newBB.isWhiteToMove = isWhiteToMove;
+        newBB.canShortCastleWhite = canShortCastleWhite;
+        newBB.canLongCastleWhite = canLongCastleWhite;
+        newBB.canShortCastleBlack = canShortCastleBlack;
+        newBB.canLongCastleBlack = canLongCastleBlack;
+        newBB.enPassantSquare = enPassantSquare;
+        newBB.isGameOver = isGameOver;
         return newBB;
     }
 

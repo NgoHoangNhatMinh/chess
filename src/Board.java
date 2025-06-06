@@ -1,4 +1,3 @@
-
 import java.util.Scanner;
 
 import java.util.ArrayList;
@@ -9,20 +8,17 @@ import java.util.Stack;
 public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
-    private int enPassantSquare = -1;
     private int halfMovesTillDraw = 100;
     private int fullMoves = 1;
     private Map<Long, Integer> zobristMap = new HashMap<>();
 
     private boolean isWhiteBot = false;
-    private boolean isBlackBot = !isWhiteBot;
+    private boolean isBlackBot = false;
 
     private Stack<Board> gameHistory = new Stack<>();
 
     public void init() {
-        bitboard = new Bitboard();
-        bitboard.init();
-        isWhite = true;
+        init("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     public void init(String fen) {
@@ -33,7 +29,6 @@ public class Board {
         bitboard = new Bitboard();
         bitboard.init(fen);
         isWhite = bitboard.isWhiteToMove;
-        enPassantSquare = bitboard.enPassantSquare;
 
         // Update halfMoves and fullMoves
         String halfMoveStr = parts[4];
@@ -56,6 +51,10 @@ public class Board {
             System.out.println(bitboard);
 
             ArrayList<Move> legalMoves = generateLegalMoves();
+            System.out.println("Legal moves before undo: " + legalMoves.size());
+            for (Move move : legalMoves) {
+                System.out.println(move);
+            }
 
             if (legalMoves.isEmpty()) {
                 if (bitboard.isKingInCheck(isWhite))
@@ -126,7 +125,6 @@ public class Board {
         Board newBoard = new Board();
         newBoard.bitboard = bitboard.copy();
         newBoard.isWhite = isWhite;
-        newBoard.enPassantSquare = enPassantSquare;
         newBoard.halfMovesTillDraw = halfMovesTillDraw;
         for (Long key : zobristMap.keySet()) {
             newBoard.zobristMap.put(key, zobristMap.get(key));
@@ -234,14 +232,13 @@ public class Board {
             // Check for en passant
             if (piece == 0 || piece == 6) {
                 if (Math.abs(from - to) == 16) { // double move
-                    enPassantSquare = isWhite ? from - 8 : from + 8; // square behind the double pawn push
+                    bitboard.enPassantSquare = isWhite ? from - 8 : from + 8; // square behind the double pawn push
                 } else {
-                    enPassantSquare = -1;
+                    bitboard.enPassantSquare = -1;
                 }
             } else {
-                enPassantSquare = -1;
+                bitboard.enPassantSquare = -1;
             }
-            bitboard.enPassantSquare = enPassantSquare;
         }
 
         halfMovesTillDraw--;
@@ -259,7 +256,6 @@ public class Board {
         Board previousBoard = gameHistory.pop();
         this.bitboard = previousBoard.bitboard.copy();
         this.isWhite = previousBoard.isWhite;
-        this.enPassantSquare = previousBoard.enPassantSquare;
         this.halfMovesTillDraw = previousBoard.halfMovesTillDraw;
         this.zobristMap = new HashMap<>(previousBoard.zobristMap);
         this.isWhiteBot = previousBoard.isWhiteBot;
@@ -274,6 +270,14 @@ public class Board {
         return zobristMap.getOrDefault(hash, 0) >= 3;
     }
 
+    public boolean isCheck() {
+        return bitboard.isKingInCheck(isWhite);
+    }
+
+    public boolean isCheckmate() {
+        return isCheck() && generateLegalMoves().isEmpty();
+    }
+
     public void switchPlayer() {
         isWhite = !isWhite;
         bitboard.switchPlayer();
@@ -281,5 +285,9 @@ public class Board {
 
     public void printBoard() {
         System.out.println(bitboard);
+    }
+
+    public int getEnPassantSquare() {
+        return bitboard.enPassantSquare;
     }
 }
