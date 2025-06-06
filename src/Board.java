@@ -11,6 +11,7 @@ public class Board {
     private boolean isWhite;
     private int enPassantSquare = -1;
     private int halfMovesTillDraw = 100;
+    private int fullMoves = 1;
     private Map<Long, Integer> zobristMap = new HashMap<>();
 
     private boolean isWhiteBot = false;
@@ -25,8 +26,27 @@ public class Board {
     }
 
     public void init(String fen) {
+        String[] parts = fen.trim().split("\\s+");
+        if (parts.length > 6)
+            throw new IllegalArgumentException("Invalid FEN string");
+
         bitboard = new Bitboard();
         bitboard.init(fen);
+        isWhite = bitboard.isWhiteToMove;
+        enPassantSquare = bitboard.enPassantSquare;
+
+        // Update halfMoves and fullMoves
+        String halfMoveStr = parts[4];
+        String fullMoveStr = parts[5];
+        try {
+            halfMovesTillDraw = 100 - Integer.parseInt(halfMoveStr);
+            fullMoves = Integer.parseInt(fullMoveStr);
+        } catch (NumberFormatException e) {
+            System.out.println(
+                    "Invalid half move count and full move count in FEN, defaulting to half move count = 100 and full move count = 1");
+            fullMoves = 1;
+            halfMovesTillDraw = 100;
+        }
     }
 
     public void run() {
@@ -36,10 +56,6 @@ public class Board {
             System.out.println(bitboard);
 
             ArrayList<Move> legalMoves = generateLegalMoves();
-            // for (Move m : legalMoves) {
-            // // For debugging
-            // System.out.println(m);
-            // }
 
             if (legalMoves.isEmpty()) {
                 if (bitboard.isKingInCheck(isWhite))
@@ -229,6 +245,8 @@ public class Board {
         }
 
         halfMovesTillDraw--;
+        if (!isWhite)
+            fullMoves++;
         bitboard.updateOccupancy();
         switchPlayer();
     }

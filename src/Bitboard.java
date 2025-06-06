@@ -47,48 +47,99 @@ public class Bitboard {
     }
 
     public void init() {
-        pieces[0] = 0x00FF000000000000L;
-        pieces[1] = 0x4200000000000000L;
-        pieces[2] = 0x2400000000000000L;
-        pieces[3] = 0x8100000000000000L;
-        pieces[4] = 0x0800000000000000L;
-        pieces[5] = 0x1000000000000000L;
-
-        pieces[6] = 0x000000000000FF00L;
-        pieces[7] = 0x0000000000000042L;
-        pieces[8] = 0x0000000000000024L;
-        pieces[9] = 0x0000000000000081L;
-        pieces[10] = 0x0000000000000008L;
-        pieces[11] = 0x0000000000000010L;
-
-        canShortCastleWhite = true;
-        canLongCastleWhite = true;
-        canShortCastleBlack = true;
-        canLongCastleBlack = true;
-
-        Random random = new Random();
-
-        for (int i = 0; i < zobristPiece.length; i++) {
-            for (int j = 0; j < zobristPiece[i].length; j++) {
-                zobristPiece[i][j] = random.nextLong();
-            }
-        }
-
-        for (int i = 0; i < zobristCastle.length; i++) {
-            zobristCastle[i] = random.nextLong();
-        }
-
-        for (int i = 0; i < zobristEnPassant.length; i++) {
-            zobristEnPassant[i] = random.nextLong();
-        }
-
-        zobristWhiteToMove = random.nextLong();
-
-        updateOccupancy();
+        init("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     public void init(String fen) {
+        String[] parts = fen.trim().split("\\s+");
+        if (parts.length > 6)
+            throw new IllegalArgumentException("Invalid FEN string");
 
+        // Piece placement
+        String[] ranks = parts[0].split("/");
+        for (int i = 0; i < 8; i++) {
+            int file = 0;
+            for (char c : ranks[i].toCharArray()) {
+                if (Character.isDigit(c)) {
+                    file += Character.getNumericValue(c); // Skip empty squares
+                } else {
+                    int pos = i * 8 + file;
+                    int piece = -1;
+                    switch (c) {
+                        case 'P':
+                            piece = 0;
+                            break;
+                        case 'N':
+                            piece = 1;
+                            break;
+                        case 'B':
+                            piece = 2;
+                            break;
+                        case 'R':
+                            piece = 3;
+                            break;
+                        case 'Q':
+                            piece = 4;
+                            break;
+                        case 'K':
+                            piece = 5;
+                            break;
+                        case 'p':
+                            piece = 6;
+                            break;
+                        case 'n':
+                            piece = 7;
+                            break;
+                        case 'b':
+                            piece = 8;
+                            break;
+                        case 'r':
+                            piece = 9;
+                            break;
+                        case 'q':
+                            piece = 10;
+                            break;
+                        case 'k':
+                            piece = 11;
+                            break;
+                    }
+                    if (piece != -1) {
+                        pieces[piece] |= (1L << pos);
+                    }
+                    file++;
+                }
+            }
+        }
+
+        updateOccupancy();
+
+        // Color to move
+        String color = parts[1];
+        if (color.equals("w")) {
+            isWhiteToMove = true;
+        } else if (color.equals("b")) {
+            isWhiteToMove = false;
+        } else {
+            throw new IllegalArgumentException("Invalid color in FEN string");
+        }
+
+        String castling = parts[2];
+        canShortCastleWhite = castling.contains("K");
+        canLongCastleWhite = castling.contains("Q");
+        canShortCastleBlack = castling.contains("k");
+        canLongCastleBlack = castling.contains("q");
+
+        String enPassant = parts[3];
+        if (enPassant.equals("-")) {
+            enPassantSquare = -1;
+        } else {
+            int enPassantSquare = Move.toNum(enPassant);
+            if (enPassantSquare < 0 || enPassantSquare > 63) {
+                throw new IllegalArgumentException("Invalid en passant square in FEN string");
+            }
+        }
+
+        generateRandomZobrist();
     }
 
     // Update occupancy after a move and save the hash of the position
@@ -610,6 +661,26 @@ public class Bitboard {
 
     public boolean isGameOver() {
         return isGameOver;
+    }
+
+    private void generateRandomZobrist() {
+        Random random = new Random();
+
+        for (int i = 0; i < zobristPiece.length; i++) {
+            for (int j = 0; j < zobristPiece[i].length; j++) {
+                zobristPiece[i][j] = random.nextLong();
+            }
+        }
+
+        for (int i = 0; i < zobristCastle.length; i++) {
+            zobristCastle[i] = random.nextLong();
+        }
+
+        for (int i = 0; i < zobristEnPassant.length; i++) {
+            zobristEnPassant[i] = random.nextLong();
+        }
+
+        zobristWhiteToMove = random.nextLong();
     }
 
     @Override
