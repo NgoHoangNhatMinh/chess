@@ -278,4 +278,8 @@ public class Board {
         isWhite = !isWhite;
         bitboard.switchPlayer();
     }
+
+    public void printBoard() {
+        System.out.println(bitboard);
+    }
 }
