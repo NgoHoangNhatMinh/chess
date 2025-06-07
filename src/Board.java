@@ -208,15 +208,16 @@ public class Board {
 
             // remove piece from source
             bitboard.removePiece(piece, from);
-            int capturedPiece = bitboard.getPieceAt(to);
+
+            // handle capture
+            int captureSquare = move.capturedSquare;
+            int capturedPiece = bitboard.getPieceAt(captureSquare);
             if (capturedPiece != -1) {
-                bitboard.removePiece(capturedPiece, to);
+                bitboard.removePiece(capturedPiece, captureSquare);
                 halfMovesSinceReset = 0;
             }
-            if (move.isEnPassant) {
-                int removedFrom = isWhite ? to + 8 : to - 8;
-                bitboard.removePiece(isWhite ? 6 : 0, removedFrom);
-            }
+
+            // handle promotion
             if (move.promotionPiece != -1)
                 bitboard.addPiece(move.promotionPiece, to);
             else

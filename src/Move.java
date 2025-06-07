@@ -149,6 +149,15 @@ public class Move {
         this.promotionPiece = promotionPiece;
     }
 
+    public Move(int from, int to, int piece, int capturedSquare, boolean isEP, int promotionPiece) {
+        this.from = from;
+        this.to = to;
+        this.piece = piece;
+        this.capturedSquare = capturedSquare;
+        this.isEnPassant = isEP;
+        this.promotionPiece = promotionPiece;
+    }
+
     public static int toNum(String s) {
         char l = s.toLowerCase().charAt(0);
         char n = s.charAt(1);
