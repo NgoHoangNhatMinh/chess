@@ -93,7 +93,7 @@ public class Board {
             if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
                 // Bot move generation
                 // selectedMove = Engine.generateBestMove(legalMoves);
-                selectedMove = Engine.generateMaximizeMaterialMove(this, 4);
+                selectedMove = Engine.rootNegaMax(this, 2);
                 System.out.println("Bot chose: " + selectedMove);
             } else {
                 String moveString = scanner.nextLine();

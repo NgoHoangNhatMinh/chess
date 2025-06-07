@@ -3,61 +3,61 @@ import java.util.ArrayList;
 public class Engine {
     public static final int CHECKMATE_SCORE = 100_000;
     public static final int STALEMATE_SCORE = 0;
+    public static final int[] PIECE_VALUES = { 100, 320, 330, 500, 900 };
 
     public static Move generateBestMove(String fen, int depth) {
         Board board = new Board();
         board.init(fen);
-        return generateMaximizeMaterialMove(board, depth);
+        return rootNegaMax(board, depth);
     }
 
-    public static Move generateMaximizeMaterialMove(Board board, int depth) {
+    public static Move rootNegaMax(Board board, int depth) {
         ArrayList<Move> legalMoves = board.generateLegalMoves();
         if (legalMoves.isEmpty())
             return null;
 
         Move bestMove = null;
-        int bestEval = board.isWhiteToMove() ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestScore = Integer.MIN_VALUE;
 
         for (Move move : legalMoves) {
             board.makeMove(move);
-            int eval = minimax(board, depth - 1, !board.isWhiteToMove());
+            int score = -negaMax(board, depth);
             board.undoMove();
-
-            if ((board.isWhiteToMove() && eval > bestEval) || (!board.isWhiteToMove() && eval < bestEval)) {
-                bestEval = eval;
+            if (score > bestScore) {
+                bestScore = score;
                 bestMove = move;
             }
         }
         return bestMove;
     }
 
-    public static int minimax(Board board, int depth, boolean maximizingPlayer) {
-        if (depth == 0) {
+    public static int negaMax(Board board, int depth) {
+        if (depth == 0 || board.isGameOver()) {
             return evaluateMaterial(board);
-        } else if (board.isGameOver()) {
-            if (board.isCheckmate()) {
-                return maximizingPlayer ? -CHECKMATE_SCORE : CHECKMATE_SCORE;
-            } else if (board.isStalemate()) {
-                return STALEMATE_SCORE;
-            }
         }
-        ArrayList<Move> moves = board.generateLegalMoves();
 
-        int optimalEval = maximizingPlayer ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        for (Move move : moves) {
+        int maxEval = Integer.MIN_VALUE;
+        for (Move move : board.generateLegalMoves()) {
             board.makeMove(move);
-            int eval = minimax(board, depth - 1, !maximizingPlayer);
+            int eval = -negaMax(board, depth - 1);
             board.undoMove();
-            optimalEval = maximizingPlayer ? Math.max(optimalEval, eval) : Math.min(optimalEval, eval);
+            maxEval = Math.max(maxEval, eval);
         }
-        return optimalEval;
+        return maxEval;
     }
 
     public static int evaluateMaterial(Board board) {
-        int[] pieceValues = { 100, 320, 330, 500, 900, 20000, -100, -320, -330, -500, -900, -20000 };
+        int who2Move = board.isWhiteToMove() ? 1 : -1;
+        if (board.isCheckmate())
+            return -who2Move * CHECKMATE_SCORE;
+        if (board.isStalemate())
+            return STALEMATE_SCORE;
+
         int score = 0;
-        for (int i = 0; i < 12; i++) {
-            score += Long.bitCount(board.getBitboard().getPieces()[i]) * pieceValues[i];
+        for (int i = 0; i < 5; i++) {
+            long numWhitePieces = Long.bitCount(board.getBitboard().getPieces()[i]);
+            long numBlackPieces = Long.bitCount(board.getBitboard().getPieces()[i + 6]);
+            score += who2Move * (numWhitePieces - numBlackPieces) * PIECE_VALUES[i];
         }
         return score;
     }
