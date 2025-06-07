@@ -293,6 +293,10 @@ public class Board {
         return bitboard.isKingInCheck(isWhite);
     }
 
+    public boolean isOpponentKingInCheck() {
+        return bitboard.isKingInCheck(!isWhite);
+    }
+
     public boolean isCheckmate() {
         return isCheck() && generateLegalMoves().isEmpty();
     }
