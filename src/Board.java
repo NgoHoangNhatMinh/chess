@@ -5,18 +5,30 @@ import java.util.Scanner;
 import java.util.Stack;
 
 public class Board {
+    // Gamestate
+    // -------------------------------------------------------------------------------------------------------
+
     private Bitboard bitboard;
     private boolean isWhite;
     private int halfMovesSinceReset = 0;
     private int fullMoves = 1;
     private Map<Long, Integer> zobristMap = new HashMap<>();
-
-    private boolean isWhiteBot = true;
-    private boolean isBlackBot = true;
-
     private boolean isGameOver = false;
 
+    // -------------------------------------------------------------------------------------------------------
+
     private Stack<Board> gameHistory = new Stack<>();
+
+    // -------------------------------------------------------------------------------------------------------
+
+    // For engine play
+    // -------------------------------------------------------------------------------------------------------
+
+    public boolean isWhiteBot = false;
+    public boolean isBlackBot = false;
+    public int engineDepth = 3;
+
+    // -------------------------------------------------------------------------------------------------------
 
     public void init() {
         init("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -101,7 +113,7 @@ public class Board {
             if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
                 // Bot move generation
                 // selectedMove = Engine.generateBestMove(legalMoves);
-                selectedMove = Engine.rootNegaMax(this, 2);
+                selectedMove = Engine.generateBestMove(this, engineDepth);
                 System.out.println("Bot chose: " + selectedMove);
             } else {
                 String moveString = scanner.nextLine();

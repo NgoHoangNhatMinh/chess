@@ -29,3 +29,9 @@ test:
 	@mkdir -p $(OUT_DIR)
 	@javac -d $(OUT_DIR) $(SOURCE)
 	@java -cp $(OUT_DIR) Perft $(DEPTH)
+
+engine:
+	@echo "Running engine..."
+	@mkdir -p $(OUT_DIR)
+	@javac -d $(OUT_DIR) $(SOURCE)
+	@java -cp $(OUT_DIR) Engine $(DEPTH)

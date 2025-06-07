@@ -34,7 +34,7 @@ or
 make test DEPTH=#enter-depth-here
 ```
 
-Here's the first 20 values
+Here's the first few values from the initial positions
 | Depth | Nodes |
 |-------|-------|
 | 1 | 20 |
@@ -47,5 +47,7 @@ Here's the first 20 values
 | 8 | 84,998,978,956|
 | 9 | 2,439,530,234,167|
 | 10 | 69,352,859,712,417|
+
+The program has included 6 different starting positions for a more robust testing of move generations across different positions.
 
 **Tips**: For most chess engines, perft is usually tested up to depth 6 or 7, as it takes exponentially longer for more than that

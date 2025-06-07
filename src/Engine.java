@@ -1,17 +1,35 @@
 import java.util.ArrayList;
 
 public class Engine {
-    public static final int CHECKMATE_SCORE = 100_000;
-    public static final int STALEMATE_SCORE = 0;
-    public static final int[] PIECE_VALUES = { 100, 320, 330, 500, 900 };
+    public static void main(String... args) {
+        Board board = new Board();
+        board.init();
+        board.isWhiteBot = true;
+        board.isBlackBot = true;
+        int engineDepth = 5;
+        if (args.length > 0) {
+            try {
+                engineDepth = Integer.parseInt(args[0]);
+                board.engineDepth = engineDepth;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid depth argument, using default depth of 3.");
+            }
+        }
+        System.out.println("\n");
+        board.run();
+    }
 
     public static Move generateBestMove(String fen, int depth) {
         Board board = new Board();
         board.init(fen);
+        return generateBestMove(board, depth);
+    }
+
+    public static Move generateBestMove(Board board, int depth) {
         return rootNegaMax(board, depth);
     }
 
-    public static Move rootNegaMax(Board board, int depth) {
+    private static Move rootNegaMax(Board board, int depth) {
         ArrayList<Move> legalMoves = board.generateLegalMoves();
         if (legalMoves.isEmpty())
             return null;
@@ -21,7 +39,7 @@ public class Engine {
 
         for (Move move : legalMoves) {
             board.makeMove(move);
-            int score = -negaMax(board, depth);
+            int score = -Search.negaMax(board, depth);
             board.undoMove();
             if (score > bestScore) {
                 bestScore = score;
@@ -31,34 +49,4 @@ public class Engine {
         return bestMove;
     }
 
-    public static int negaMax(Board board, int depth) {
-        if (depth == 0 || board.isGameOver()) {
-            return evaluateMaterial(board);
-        }
-
-        int maxEval = Integer.MIN_VALUE;
-        for (Move move : board.generateLegalMoves()) {
-            board.makeMove(move);
-            int eval = -negaMax(board, depth - 1);
-            board.undoMove();
-            maxEval = Math.max(maxEval, eval);
-        }
-        return maxEval;
-    }
-
-    public static int evaluateMaterial(Board board) {
-        int who2Move = board.isWhiteToMove() ? 1 : -1;
-        if (board.isCheckmate())
-            return -who2Move * CHECKMATE_SCORE;
-        if (board.isStalemate())
-            return STALEMATE_SCORE;
-
-        int score = 0;
-        for (int i = 0; i < 5; i++) {
-            long numWhitePieces = Long.bitCount(board.getBitboard().getPieces()[i]);
-            long numBlackPieces = Long.bitCount(board.getBitboard().getPieces()[i + 6]);
-            score += who2Move * (numWhitePieces - numBlackPieces) * PIECE_VALUES[i];
-        }
-        return score;
-    }
 }
