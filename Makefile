@@ -35,3 +35,9 @@ engine:
 	@mkdir -p $(OUT_DIR)
 	@javac -d $(OUT_DIR) $(SOURCE)
 	@java -cp $(OUT_DIR) Engine $(DEPTH)
+
+play:
+	@echo "Playing against engine..."
+	@mkdir -p $(OUT_DIR)
+	@javac -d $(OUT_DIR) $(SOURCE)
+	@java -cp $(OUT_DIR) Main $(COLOR)
