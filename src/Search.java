@@ -4,7 +4,7 @@ import java.util.Comparator;
 public class Search {
     public static int negaMax(Board board, int depth, int alpha, int beta) {
         if (depth == 0 || board.isGameOver()) {
-            return Evaluate.evaluateMaterial(board);
+            return Evaluate.evaluate(board);
         }
 
         int maxEval = Integer.MIN_VALUE;
