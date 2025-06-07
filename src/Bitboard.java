@@ -700,6 +700,10 @@ public class Bitboard {
         zobristWhiteToMove = random.nextLong();
     }
 
+    public long[] getPieces() {
+        return pieces;
+    }
+
     @Override
     public String toString() {
         String board = "";

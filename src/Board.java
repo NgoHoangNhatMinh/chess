@@ -15,6 +15,8 @@ public class Board {
     private boolean isWhiteBot = true;
     private boolean isBlackBot = true;
 
+    private boolean isGameOver = false;
+
     private Stack<Board> gameHistory = new Stack<>();
 
     public void init() {
@@ -61,18 +63,22 @@ public class Board {
                     System.out.println((isWhite ? "White" : "Black") + " is checkmated");
                 else
                     System.out.println("The game is a draw by stalemate");
+                isGameOver = true;
                 break;
             }
             if (halfMovesTillDraw == 0) {
                 System.out.println("The game is a draw by 50-move rule");
+                isGameOver = true;
                 break;
             }
             if (isThreefoldRepetition()) {
                 System.out.println("The game is a draw by threefold repetition");
+                isGameOver = true;
                 break;
             }
             if (bitboard.isInsufficientMaterial()) {
                 System.out.println("The game is a draw by insufficient material");
+                isGameOver = true;
                 break;
             }
 
@@ -86,7 +92,8 @@ public class Board {
             Move selectedMove = null;
             if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
                 // Bot move generation
-                selectedMove = Engine.generateBestMove(legalMoves);
+                // selectedMove = Engine.generateBestMove(legalMoves);
+                selectedMove = Engine.generateMaximizeMaterialMove(this, 4);
                 System.out.println("Bot chose: " + selectedMove);
             } else {
                 String moveString = scanner.nextLine();
@@ -114,12 +121,14 @@ public class Board {
         newBoard.bitboard = bitboard.copy();
         newBoard.isWhite = isWhite;
         newBoard.halfMovesTillDraw = halfMovesTillDraw;
+        newBoard.fullMoves = fullMoves;
         for (Long key : zobristMap.keySet()) {
             newBoard.zobristMap.put(key, zobristMap.get(key));
         }
 
         newBoard.isWhiteBot = isWhiteBot;
         newBoard.isBlackBot = isBlackBot;
+        newBoard.isGameOver = isGameOver;
         return newBoard;
     }
 
@@ -175,14 +184,14 @@ public class Board {
             int piece = move.piece;
 
             if (piece == 0 || piece == 6)
-                halfMovesTillDraw = 0;
+                halfMovesTillDraw = 100;
 
             // remove piece from source
             bitboard.removePiece(piece, from);
             int capturedPiece = bitboard.getPieceAt(to);
             if (capturedPiece != -1) {
                 bitboard.removePiece(capturedPiece, to);
-                halfMovesTillDraw = 0;
+                halfMovesTillDraw = 100;
             }
             if (move.isEnPassant) {
                 int removedFrom = isWhite ? to + 8 : to - 8;
@@ -247,6 +256,7 @@ public class Board {
         this.bitboard = previousBoard.bitboard.copy();
         this.isWhite = previousBoard.isWhite;
         this.halfMovesTillDraw = previousBoard.halfMovesTillDraw;
+        this.fullMoves = previousBoard.fullMoves;
         this.zobristMap = new HashMap<>(previousBoard.zobristMap);
         this.isWhiteBot = previousBoard.isWhiteBot;
         this.isBlackBot = previousBoard.isBlackBot;
@@ -268,6 +278,10 @@ public class Board {
         return isCheck() && generateLegalMoves().isEmpty();
     }
 
+    public boolean isStalemate() {
+        return !isCheck() && generateLegalMoves().isEmpty();
+    }
+
     public void switchPlayer() {
         isWhite = !isWhite;
         bitboard.switchPlayer();
@@ -279,5 +293,17 @@ public class Board {
 
     public int getEnPassantSquare() {
         return bitboard.enPassantSquare;
+    }
+
+    public Bitboard getBitboard() {
+        return bitboard;
+    }
+
+    public boolean isWhiteToMove() {
+        return isWhite;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
     }
 }
