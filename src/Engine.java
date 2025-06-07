@@ -39,7 +39,7 @@ public class Engine {
 
         for (Move move : legalMoves) {
             board.makeMove(move);
-            int score = -Search.negaMax(board, depth);
+            int score = -Search.negaMax(board, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             board.undoMove();
             if (score > bestScore) {
                 bestScore = score;
