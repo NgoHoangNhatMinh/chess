@@ -12,8 +12,8 @@ public class Board {
     private int fullMoves = 1;
     private Map<Long, Integer> zobristMap = new HashMap<>();
 
-    private boolean isWhiteBot = false;
-    private boolean isBlackBot = false;
+    private boolean isWhiteBot = true;
+    private boolean isBlackBot = true;
 
     private Stack<Board> gameHistory = new Stack<>();
 
@@ -50,6 +50,10 @@ public class Board {
         while (!bitboard.isGameOver()) {
             System.out.println(bitboard);
 
+            // Mark the current position as visited by adding to zobrist map
+            long hash = bitboard.zobristHash();
+            zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
+
             ArrayList<Move> legalMoves = generateLegalMoves();
 
             if (legalMoves.isEmpty()) {
@@ -79,37 +83,25 @@ public class Board {
             // Inputting move
             System.out.println(fullMoves + ". " + (isWhite ? "White" : "Black") + " to move: ");
 
+            Move selectedMove = null;
             if (isWhite && isWhiteBot || !isWhite && isBlackBot) {
                 // Bot move generation
-                Move botMove = Engine.generateBestMove(legalMoves);
-                System.out.println("Bot chose: " + botMove);
-                makeMove(botMove);
-                long hash = bitboard.zobristHash();
-                zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
-                // System.out.println("Zobrist Hash: " + hash + ", Count: " +
-                // zobristMap.get(hash));
-                continue;
-            }
-
-            String moveString = scanner.nextLine();
-            Move move = new Move(moveString, isWhite);
-
-            // clearScreen();
-            System.out.println(move);
-
-            Move selectedMove = null;
-            for (Move m : legalMoves) {
-                if (m.equals(new Move(moveString, isWhite))) {
-                    selectedMove = m;
+                selectedMove = Engine.generateBestMove(legalMoves);
+                System.out.println("Bot chose: " + selectedMove);
+            } else {
+                String moveString = scanner.nextLine();
+                Move move = new Move(moveString, isWhite);
+                System.out.println(move);
+                for (Move m : legalMoves) {
+                    if (m.equals(new Move(moveString, isWhite))) {
+                        selectedMove = m;
+                    }
                 }
             }
+
             // If legal move, board make move
             if (selectedMove != null) {
                 makeMove(selectedMove);
-                long hash = bitboard.zobristHash();
-                zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
-                // System.out.println("Zobrist Hash: " + hash + ", Count: " +
-                // zobristMap.get(hash));
             } else {
                 System.out.println("This is not a legal move\n");
             }

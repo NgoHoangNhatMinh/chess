@@ -664,10 +664,10 @@ public class Bitboard {
             if (whitePieces <= 1 && blackPieces <= 1) {
                 return true; // Only kings or one minor piece each
             }
-        }
-        if (Long.bitCount(pieces[2]) == 1 && Long.bitCount(pieces[8]) == 1) {
-            // Only one bishop each on opposite colors
-            return Long.numberOfTrailingZeros(pieces[2]) % 2 != Long.numberOfTrailingZeros(pieces[8]) % 2;
+            if (Long.bitCount(pieces[2]) == 1 && Long.bitCount(pieces[8]) == 1) {
+                // Only one bishop each on opposite colors
+                return Long.numberOfTrailingZeros(pieces[2]) % 2 != Long.numberOfTrailingZeros(pieces[8]) % 2;
+            }
         }
         return false;
     }
