@@ -1,14 +1,13 @@
-import java.util.Scanner;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Stack;
 
 public class Board {
     private Bitboard bitboard;
     private boolean isWhite;
-    private int halfMovesTillDraw = 100;
+    private int halfMovesSinceReset = 0;
     private int fullMoves = 1;
     private Map<Long, Integer> zobristMap = new HashMap<>();
 
@@ -30,19 +29,28 @@ public class Board {
 
         bitboard = new Bitboard();
         bitboard.init(fen);
-        isWhite = bitboard.isWhiteToMove;
+
+        // Color to move
+        String color = parts[1];
+        if (color.equals("w")) {
+            isWhite = true;
+        } else if (color.equals("b")) {
+            isWhite = false;
+        } else {
+            throw new IllegalArgumentException("Invalid color in FEN string");
+        }
 
         // Update halfMoves and fullMoves
         String halfMoveStr = parts[4];
         String fullMoveStr = parts[5];
         try {
-            halfMovesTillDraw = 100 - Integer.parseInt(halfMoveStr);
+            halfMovesSinceReset = Integer.parseInt(halfMoveStr);
             fullMoves = Integer.parseInt(fullMoveStr);
         } catch (NumberFormatException e) {
             System.out.println(
                     "Invalid half move count and full move count in FEN, defaulting to half move count = 100 and full move count = 1");
             fullMoves = 1;
-            halfMovesTillDraw = 100;
+            halfMovesSinceReset = 0;
         }
     }
 
@@ -53,7 +61,7 @@ public class Board {
             System.out.println(bitboard);
 
             // Mark the current position as visited by adding to zobrist map
-            long hash = bitboard.zobristHash();
+            long hash = bitboard.zobristHash(isWhite);
             zobristMap.put(hash, zobristMap.getOrDefault(hash, 0) + 1);
 
             ArrayList<Move> legalMoves = generateLegalMoves();
@@ -66,7 +74,7 @@ public class Board {
                 isGameOver = true;
                 break;
             }
-            if (halfMovesTillDraw == 0) {
+            if (halfMovesSinceReset == 100) {
                 System.out.println("The game is a draw by 50-move rule");
                 isGameOver = true;
                 break;
@@ -120,7 +128,7 @@ public class Board {
         Board newBoard = new Board();
         newBoard.bitboard = bitboard.copy();
         newBoard.isWhite = isWhite;
-        newBoard.halfMovesTillDraw = halfMovesTillDraw;
+        newBoard.halfMovesSinceReset = halfMovesSinceReset;
         newBoard.fullMoves = fullMoves;
         for (Long key : zobristMap.keySet()) {
             newBoard.zobristMap.put(key, zobristMap.get(key));
@@ -184,14 +192,14 @@ public class Board {
             int piece = move.piece;
 
             if (piece == 0 || piece == 6)
-                halfMovesTillDraw = 100;
+                halfMovesSinceReset = 0;
 
             // remove piece from source
             bitboard.removePiece(piece, from);
             int capturedPiece = bitboard.getPieceAt(to);
             if (capturedPiece != -1) {
                 bitboard.removePiece(capturedPiece, to);
-                halfMovesTillDraw = 100;
+                halfMovesSinceReset = 0;
             }
             if (move.isEnPassant) {
                 int removedFrom = isWhite ? to + 8 : to - 8;
@@ -240,7 +248,7 @@ public class Board {
             }
         }
 
-        halfMovesTillDraw--;
+        halfMovesSinceReset--;
         if (!isWhite)
             fullMoves++;
         bitboard.updateOccupancy();
@@ -255,18 +263,16 @@ public class Board {
         Board previousBoard = gameHistory.pop();
         this.bitboard = previousBoard.bitboard.copy();
         this.isWhite = previousBoard.isWhite;
-        this.halfMovesTillDraw = previousBoard.halfMovesTillDraw;
+        this.halfMovesSinceReset = previousBoard.halfMovesSinceReset;
         this.fullMoves = previousBoard.fullMoves;
         this.zobristMap = new HashMap<>(previousBoard.zobristMap);
         this.isWhiteBot = previousBoard.isWhiteBot;
         this.isBlackBot = previousBoard.isBlackBot;
         bitboard.updateOccupancy();
-        switchPlayer();
-        isWhite = !isWhite; // Switch player back to the previous player
     }
 
     public boolean isThreefoldRepetition() {
-        long hash = bitboard.zobristHash();
+        long hash = bitboard.zobristHash(isWhite);
         return zobristMap.getOrDefault(hash, 0) >= 3;
     }
 
@@ -284,7 +290,6 @@ public class Board {
 
     public void switchPlayer() {
         isWhite = !isWhite;
-        bitboard.switchPlayer();
     }
 
     public void printBoard() {

@@ -28,8 +28,6 @@ public class Bitboard {
     long[] pieces = new long[13];
     long whiteOccupancy, blackOccupancy, occupancy, emptyOccupancy;
 
-    public boolean isWhiteToMove = true;
-
     public boolean canShortCastleWhite;
     public boolean canLongCastleWhite;
     public boolean canShortCastleBlack;
@@ -118,16 +116,6 @@ public class Bitboard {
 
         updateOccupancy();
 
-        // Color to move
-        String color = parts[1];
-        if (color.equals("w")) {
-            isWhiteToMove = true;
-        } else if (color.equals("b")) {
-            isWhiteToMove = false;
-        } else {
-            throw new IllegalArgumentException("Invalid color in FEN string");
-        }
-
         String castling = parts[2];
         canShortCastleWhite = castling.contains("K");
         canLongCastleWhite = castling.contains("Q");
@@ -175,7 +163,6 @@ public class Bitboard {
         newBB.blackOccupancy = blackOccupancy;
         newBB.occupancy = occupancy;
         newBB.emptyOccupancy = emptyOccupancy;
-        newBB.isWhiteToMove = isWhiteToMove;
         newBB.canShortCastleWhite = canShortCastleWhite;
         newBB.canLongCastleWhite = canLongCastleWhite;
         newBB.canShortCastleBlack = canShortCastleBlack;
@@ -624,7 +611,7 @@ public class Bitboard {
         return isChecked;
     }
 
-    public long zobristHash() {
+    public long zobristHash(boolean isWhite) {
         long hash = 0L;
         for (int i = 0; i < 12; i++) {
             long bitboard = pieces[i];
@@ -650,7 +637,7 @@ public class Bitboard {
             hash ^= zobristEnPassant[enPassantSquare % 8]; // Only the file is needed for the hash
         }
 
-        if (!isWhiteToMove) {
+        if (!isWhite) {
             hash ^= zobristWhiteToMove;
         }
 
@@ -670,10 +657,6 @@ public class Bitboard {
             }
         }
         return false;
-    }
-
-    public void switchPlayer() {
-        isWhiteToMove = !isWhiteToMove;
     }
 
     public boolean isGameOver() {
