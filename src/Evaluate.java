@@ -111,7 +111,7 @@ public class Evaluate {
             while (blackPiece != 0) {
                 int sq = Long.numberOfTrailingZeros(blackPiece);
                 int mirroredSq = sq ^ 56;
-                positionalScore += PIECE_SQUARES_TABLE[i][mirroredSq];
+                positionalScore += -PIECE_SQUARES_TABLE[i][mirroredSq];
                 blackPiece &= blackPiece - 1;
             }
 
