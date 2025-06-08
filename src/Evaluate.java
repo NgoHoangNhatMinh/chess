@@ -1,6 +1,6 @@
 public class Evaluate {
         public static final int CHECKMATE_SCORE = 100_000;
-        public static final int STALEMATE_SCORE = 0;
+        public static final int DRAW_SCORE = 0;
         public static final int[] PIECE_VALUES = { 100, 320, 330, 500, 900, 200_000 };
 
         public static final int[] PAWN_SQUARES_VALUES = {
@@ -89,9 +89,13 @@ public class Evaluate {
                 if (board.isCheckmate())
                         return -who2Move * CHECKMATE_SCORE;
                 if (board.isStalemate())
-                        return STALEMATE_SCORE;
+                        return DRAW_SCORE;
                 if (board.isThreefoldRepetition())
-                        return STALEMATE_SCORE;
+                        return DRAW_SCORE;
+                if (board.isFiftyMove())
+                        return DRAW_SCORE;
+                if (board.isInsufficientMaterial())
+                        return DRAW_SCORE;
 
                 int score = 0;
                 for (int i = 0; i <= 5; i++) {

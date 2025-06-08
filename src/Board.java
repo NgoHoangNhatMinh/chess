@@ -86,7 +86,7 @@ public class Board {
                 isGameOver = true;
                 break;
             }
-            if (halfMovesSinceReset == 100) {
+            if (isFiftyMove()) {
                 System.out.println("The game is a draw by 50-move rule");
                 isGameOver = true;
                 break;
@@ -96,7 +96,7 @@ public class Board {
                 isGameOver = true;
                 break;
             }
-            if (bitboard.isInsufficientMaterial()) {
+            if (isInsufficientMaterial()) {
                 System.out.println("The game is a draw by insufficient material");
                 isGameOver = true;
                 break;
@@ -261,7 +261,7 @@ public class Board {
             }
         }
 
-        halfMovesSinceReset--;
+        halfMovesSinceReset++;
         if (!isWhite)
             fullMoves++;
         bitboard.updateOccupancy();
@@ -331,5 +331,13 @@ public class Board {
 
     public long zobristHash() {
         return bitboard.zobristHash(isWhite);
+    }
+
+    public boolean isFiftyMove() {
+        return halfMovesSinceReset >= 100;
+    }
+
+    public boolean isInsufficientMaterial() {
+        return bitboard.isInsufficientMaterial();
     }
 }
