@@ -285,7 +285,7 @@ public class Board {
     }
 
     public boolean isThreefoldRepetition() {
-        long hash = bitboard.zobristHash(isWhite);
+        long hash = zobristHash();
         return zobristMap.getOrDefault(hash, 0) >= 3;
     }
 
@@ -327,5 +327,9 @@ public class Board {
 
     public boolean isGameOver() {
         return isGameOver;
+    }
+
+    public long zobristHash() {
+        return bitboard.zobristHash(isWhite);
     }
 }

@@ -1,8 +1,18 @@
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;;
 
 public class Search {
+    public static HashMap<Long, TranspositionEntry> transpositionTable = new HashMap<>();
+
     public static int negaMax(Board board, int depth, int alpha, int beta) {
+        long hash = board.zobristHash();
+        TranspositionEntry entry = transpositionTable.get(hash);
+        // Only return transposition with deeper search
+        if (entry != null && entry.depth >= depth) {
+            return entry.depth;
+        }
+
         if (depth == 0 || board.isGameOver()) {
             return Evaluate.evaluate(board);
         }
@@ -20,10 +30,13 @@ public class Search {
             if (alpha >= beta)
                 break;
         }
+
+        // Save eval to transposition table
+        transpositionTable.put(hash, new TranspositionEntry(maxEval, depth));
         return maxEval;
     }
 
-    public static class MoveComparator implements Comparator<Move> {
+    private static class MoveComparator implements Comparator<Move> {
         private Board board;
 
         public MoveComparator(Board board) {
@@ -58,6 +71,16 @@ public class Search {
             boolean isCheck = board.isOpponentKingInCheck();
             board.undoMove();
             return isCheck;
+        }
+    }
+
+    private static class TranspositionEntry {
+        public int score;
+        public int depth;
+
+        public TranspositionEntry(int score, int depth) {
+            this.score = score;
+            this.depth = depth;
         }
     }
 }
